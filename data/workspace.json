@@ -3,7 +3,8 @@
   "description" : "Description",
   "documentation" : { },
   "id" : 1,
-  "lastModifiedDate" : "2025-03-24T20:25:07Z",
+  "lastModifiedAgent" : "structurizr-ui",
+  "lastModifiedDate" : "2025-03-24T20:50:13Z",
   "model" : {
     "people" : [ {
       "description" : "Schedules interviews, interacts with chatbot, monitors status, and uses dashboard",
@@ -16,9 +17,21 @@
       "relationships" : [ {
         "description" : "Schedules interviews and views reports",
         "destinationId" : "10",
-        "id" : "11",
+        "id" : "22",
         "sourceId" : "1",
         "tags" : "Relationship,InternalFlow"
+      }, {
+        "description" : "Asks for availability, initiates scheduling",
+        "destinationId" : "11",
+        "id" : "43",
+        "sourceId" : "1",
+        "tags" : "Relationship"
+      }, {
+        "description" : "Manages and tracks interviews",
+        "destinationId" : "12",
+        "id" : "44",
+        "sourceId" : "1",
+        "tags" : "Relationship"
       } ],
       "tags" : "Element,Person"
     }, {
@@ -32,7 +45,7 @@
       "relationships" : [ {
         "description" : "Selects slot via MindComputeScheduler (callback flow)",
         "destinationId" : "10",
-        "id" : "13",
+        "id" : "24",
         "sourceId" : "2",
         "tags" : "Relationship,ExternalFlow"
       } ],
@@ -48,7 +61,7 @@
       "relationships" : [ {
         "description" : "RSVPs via calendar or chat",
         "destinationId" : "10",
-        "id" : "15",
+        "id" : "26",
         "sourceId" : "3",
         "tags" : "Relationship,ExternalFlow"
       } ],
@@ -115,6 +128,324 @@
       },
       "tags" : "Element,Software System,ExternalSystem"
     }, {
+      "containers" : [ {
+        "description" : "Conversational interface for recruiters to query interviewer availability, initiate scheduling, and get updates",
+        "documentation" : { },
+        "id" : "11",
+        "name" : "Chatbot Service",
+        "properties" : {
+          "structurizr.dsl.identifier" : "chatbot"
+        },
+        "relationships" : [ {
+          "description" : "Receives chat queries",
+          "destinationId" : "8",
+          "id" : "42",
+          "sourceId" : "11",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Requests interviewer suggestions",
+          "destinationId" : "18",
+          "id" : "47",
+          "sourceId" : "11",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Fetches slot suggestions",
+          "destinationId" : "19",
+          "id" : "48",
+          "sourceId" : "11",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Confirms availability",
+          "destinationId" : "16",
+          "id" : "49",
+          "sourceId" : "11",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Publishes query/request events",
+          "destinationId" : "27",
+          "id" : "62",
+          "sourceId" : "11",
+          "tags" : "Relationship"
+        } ],
+        "tags" : "Element,Container",
+        "technology" : "Python + FastAPI + LangChain"
+      }, {
+        "description" : "Web UI to view status, reports, initiate interviews",
+        "documentation" : { },
+        "id" : "12",
+        "name" : "Dashboard Service",
+        "properties" : {
+          "structurizr.dsl.identifier" : "dashboard"
+        },
+        "relationships" : [ {
+          "description" : "Updates interview records",
+          "destinationId" : "4",
+          "id" : "38",
+          "sourceId" : "12",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Requests best interviewer matches",
+          "destinationId" : "18",
+          "id" : "45",
+          "sourceId" : "12",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Fetches available slots",
+          "destinationId" : "19",
+          "id" : "46",
+          "sourceId" : "12",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Publishes user actions",
+          "destinationId" : "27",
+          "id" : "63",
+          "sourceId" : "12",
+          "tags" : "Relationship"
+        } ],
+        "tags" : "Element,Container",
+        "technology" : "Flutter + REST API"
+      }, {
+        "description" : "Fetches and serves interviewer metadata (skills, grade, timezone)",
+        "documentation" : { },
+        "id" : "13",
+        "name" : "Interviewer Profile Service",
+        "properties" : {
+          "structurizr.dsl.identifier" : "profileservice"
+        },
+        "relationships" : [ {
+          "description" : "Fetches interviewer data",
+          "destinationId" : "6",
+          "id" : "35",
+          "sourceId" : "13",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Publishes profile updates",
+          "destinationId" : "27",
+          "id" : "68",
+          "sourceId" : "13",
+          "tags" : "Relationship"
+        } ],
+        "tags" : "Element,Container",
+        "technology" : "Python + FastAPI + Redis"
+      }, {
+        "description" : "Fetches and serves candidate profiles and preferences",
+        "documentation" : { },
+        "id" : "14",
+        "name" : "Candidate Insights Service",
+        "properties" : {
+          "structurizr.dsl.identifier" : "candidateservice"
+        },
+        "relationships" : [ {
+          "description" : "Fetches candidate profile",
+          "destinationId" : "4",
+          "id" : "36",
+          "sourceId" : "14",
+          "tags" : "Relationship"
+        } ],
+        "tags" : "Element,Container",
+        "technology" : "Python + FastAPI + Redis"
+      }, {
+        "description" : "Manages interviewer's availability preferences, block/savelist logic",
+        "documentation" : { },
+        "id" : "15",
+        "name" : "Interviewer Preferences Service",
+        "properties" : {
+          "structurizr.dsl.identifier" : "preferencesservice"
+        },
+        "relationships" : [ {
+          "description" : "Fetches round/time preferences",
+          "destinationId" : "5",
+          "id" : "37",
+          "sourceId" : "15",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Publishes preference changes",
+          "destinationId" : "27",
+          "id" : "67",
+          "sourceId" : "15",
+          "tags" : "Relationship"
+        } ],
+        "tags" : "Element,Container",
+        "technology" : "Python + FastAPI + Redis"
+      }, {
+        "description" : "Evaluates slot-level availability using Calendar and LeavePlanner",
+        "documentation" : { },
+        "id" : "16",
+        "name" : "Availability Evaluator Service",
+        "properties" : {
+          "structurizr.dsl.identifier" : "availabilityservice"
+        },
+        "relationships" : [ {
+          "description" : "Reads calendar, sends invites",
+          "destinationId" : "9",
+          "id" : "40",
+          "sourceId" : "16",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Reads leave data",
+          "destinationId" : "7",
+          "id" : "41",
+          "sourceId" : "16",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Uses block/savelist",
+          "destinationId" : "15",
+          "id" : "58",
+          "sourceId" : "16",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Uses Calendar API",
+          "destinationId" : "9",
+          "id" : "59",
+          "sourceId" : "16",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Checks leave status",
+          "destinationId" : "7",
+          "id" : "60",
+          "sourceId" : "16",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Publishes availability status",
+          "destinationId" : "27",
+          "id" : "66",
+          "sourceId" : "16",
+          "tags" : "Relationship"
+        } ],
+        "tags" : "Element,Container",
+        "technology" : "Go + Fiber + Calendar API"
+      }, {
+        "description" : "Manages matcher dimension weights, processing logic, and runtime overrides",
+        "documentation" : { },
+        "id" : "17",
+        "name" : "Scheduling Config Service",
+        "properties" : {
+          "structurizr.dsl.identifier" : "configservice"
+        },
+        "tags" : "Element,Container",
+        "technology" : "Python + FastAPI + PostgreSQL"
+      }, {
+        "description" : "Scores and ranks best-fit interviewers for a candidate based on multiple dimensions",
+        "documentation" : { },
+        "id" : "18",
+        "name" : "Matcher & Selector Service",
+        "properties" : {
+          "structurizr.dsl.identifier" : "matcher"
+        },
+        "relationships" : [ {
+          "description" : "Fetches matcher config",
+          "destinationId" : "17",
+          "id" : "50",
+          "sourceId" : "18",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Fetches interviewer profile",
+          "destinationId" : "13",
+          "id" : "51",
+          "sourceId" : "18",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Fetches candidate profile",
+          "destinationId" : "14",
+          "id" : "52",
+          "sourceId" : "18",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Fetches preferences",
+          "destinationId" : "15",
+          "id" : "53",
+          "sourceId" : "18",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Checks availability",
+          "destinationId" : "16",
+          "id" : "54",
+          "sourceId" : "18",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Publishes match suggestions",
+          "destinationId" : "27",
+          "id" : "64",
+          "sourceId" : "18",
+          "tags" : "Relationship"
+        } ],
+        "tags" : "Element,Container",
+        "technology" : "Go + Fiber + Redis"
+      }, {
+        "description" : "Suggests optimal interview time slots based on preferences and availability",
+        "documentation" : { },
+        "id" : "19",
+        "name" : "Slot Recommender Service",
+        "properties" : {
+          "structurizr.dsl.identifier" : "slotsuggester"
+        },
+        "relationships" : [ {
+          "description" : "Gets top interviewers",
+          "destinationId" : "18",
+          "id" : "55",
+          "sourceId" : "19",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Fetches slots",
+          "destinationId" : "16",
+          "id" : "56",
+          "sourceId" : "19",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Applies preference filters",
+          "destinationId" : "15",
+          "id" : "57",
+          "sourceId" : "19",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Publishes slot recommendations",
+          "destinationId" : "27",
+          "id" : "65",
+          "sourceId" : "19",
+          "tags" : "Relationship"
+        } ],
+        "tags" : "Element,Container",
+        "technology" : "Go + Fiber"
+      }, {
+        "description" : "Runs ETL, generates analytics dashboards, metrics and history reports",
+        "documentation" : { },
+        "id" : "20",
+        "name" : "Reporting & Analytics Service",
+        "properties" : {
+          "structurizr.dsl.identifier" : "reportingservice"
+        },
+        "relationships" : [ {
+          "description" : "Sends reports/alerts",
+          "destinationId" : "8",
+          "id" : "39",
+          "sourceId" : "20",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Consumes system events",
+          "destinationId" : "27",
+          "id" : "61",
+          "sourceId" : "20",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Publishes reports generated",
+          "destinationId" : "27",
+          "id" : "69",
+          "sourceId" : "20",
+          "tags" : "Relationship"
+        } ],
+        "tags" : "Element,Container",
+        "technology" : "Python + FastAPI + ETL + PostgreSQL + Grafana"
+      }, {
+        "description" : "Handles authentication (Okta SSO), routes and enforces RBAC",
+        "documentation" : { },
+        "id" : "21",
+        "name" : "Auth Gateway",
+        "properties" : {
+          "structurizr.dsl.identifier" : "authgateway"
+        },
+        "tags" : "Element,Container",
+        "technology" : "Go + OIDC + API Gateway"
+      } ],
       "description" : "Recruitment platform to match, schedule, notify, and track interviews",
       "documentation" : { },
       "id" : "10",
@@ -126,55 +457,55 @@
       "relationships" : [ {
         "description" : "Sends updates, dashboards, reports",
         "destinationId" : "1",
-        "id" : "12",
+        "id" : "23",
         "sourceId" : "10",
         "tags" : "Relationship,InternalFlow"
       }, {
         "description" : "Sends calendar invites and notifications",
         "destinationId" : "3",
-        "id" : "14",
+        "id" : "25",
         "sourceId" : "10",
         "tags" : "Relationship,InternalFlow"
       }, {
         "description" : "Publishes and consumes events",
-        "destinationId" : "16",
-        "id" : "17",
+        "destinationId" : "27",
+        "id" : "28",
         "sourceId" : "10",
         "tags" : "Relationship,InternalFlow"
       }, {
         "description" : "Fetches candidate status and updates interview",
         "destinationId" : "4",
-        "id" : "18",
+        "id" : "29",
         "sourceId" : "10",
         "tags" : "Relationship,ExternalFlow"
       }, {
         "description" : "Generates scheduling link, receives callbacks",
         "destinationId" : "5",
-        "id" : "19",
+        "id" : "30",
         "sourceId" : "10",
         "tags" : "Relationship,ExternalFlow"
       }, {
         "description" : "Fetches interviewer profiles",
         "destinationId" : "6",
-        "id" : "20",
+        "id" : "31",
         "sourceId" : "10",
         "tags" : "Relationship,ExternalFlow"
       }, {
         "description" : "Fetches leave data",
         "destinationId" : "7",
-        "id" : "21",
+        "id" : "32",
         "sourceId" : "10",
         "tags" : "Relationship,ExternalFlow"
       }, {
         "description" : "Sends chat messages, receives chatbot queries",
         "destinationId" : "8",
-        "id" : "22",
+        "id" : "33",
         "sourceId" : "10",
         "tags" : "Relationship,ExternalFlow"
       }, {
         "description" : "Sends invites, receives RSVP updates",
         "destinationId" : "9",
-        "id" : "23",
+        "id" : "34",
         "sourceId" : "10",
         "tags" : "Relationship,ExternalFlow"
       } ],
@@ -182,7 +513,7 @@
     }, {
       "description" : "Internal event broker for microservices",
       "documentation" : { },
-      "id" : "16",
+      "id" : "27",
       "location" : "Unspecified",
       "name" : "Event Bus (Kafka / PubSub)",
       "properties" : {
@@ -193,12 +524,13 @@
   },
   "name" : "Name",
   "properties" : {
-    "structurizr.dsl" : "d29ya3NwYWNlIHsKCiAgICBtb2RlbCB7CiAgICAgICAgcmVjcnVpdGVyID0gcGVyc29uICJSZWNydWl0ZXIiIHsKICAgICAgICAgICAgZGVzY3JpcHRpb24gIlNjaGVkdWxlcyBpbnRlcnZpZXdzLCBpbnRlcmFjdHMgd2l0aCBjaGF0Ym90LCBtb25pdG9ycyBzdGF0dXMsIGFuZCB1c2VzIGRhc2hib2FyZCIKICAgICAgICAgICAgdGFncyAiUGVyc29uIgogICAgICAgIH0KCiAgICAgICAgY2FuZGlkYXRlID0gcGVyc29uICJDYW5kaWRhdGUiIHsKICAgICAgICAgICAgZGVzY3JpcHRpb24gIlNlbGVjdHMgaW50ZXJ2aWV3IHNsb3QgZnJvbSBzY2hlZHVsaW5nIGxpbmsiCiAgICAgICAgICAgIHRhZ3MgIlBlcnNvbiIKICAgICAgICB9CgogICAgICAgIGludGVydmlld2VyID0gcGVyc29uICJJbnRlcnZpZXdlciIgewogICAgICAgICAgICBkZXNjcmlwdGlvbiAiQ29uZHVjdHMgaW50ZXJ2aWV3cywgcmVzcG9uZHMgdmlhIGNhbGVuZGFyIG9yIGNoYXQiCiAgICAgICAgICAgIHRhZ3MgIlBlcnNvbiIKICAgICAgICB9CgogICAgICAgIC8vIEV4dGVybmFsIHN5c3RlbXMKICAgICAgICBncmVlbmhvdXNlID0gc29mdHdhcmVTeXN0ZW0gIkdyZWVuaG91c2UiIHsKICAgICAgICAgICAgZGVzY3JpcHRpb24gIkFUUyB1c2VkIGZvciB0cmFja2luZyBjYW5kaWRhdGVzIGFuZCBpbnRlcnZpZXcgZmVlZGJhY2suIgogICAgICAgICAgICB0YWdzICJFeHRlcm5hbFN5c3RlbSIKICAgICAgICB9CgogICAgICAgIGdvb2R0aW1lID0gc29mdHdhcmVTeXN0ZW0gIkdvb2RUaW1lIiB7CiAgICAgICAgICAgIGRlc2NyaXB0aW9uICJUb29sIHRvIGdlbmVyYXRlIHNjaGVkdWxpbmcgbGlua3MgYW5kIG1hbmFnZSBpbnRlcnZpZXdlciBwcmVmZXJlbmNlcy4iCiAgICAgICAgICAgIHRhZ3MgIkV4dGVybmFsU3lzdGVtIgogICAgICAgIH0KCiAgICAgICAgamlnc2F3ID0gc29mdHdhcmVTeXN0ZW0gIkppZ3NhdyIgewogICAgICAgICAgICBkZXNjcmlwdGlvbiAiSW50ZXJuYWwgZGlyZWN0b3J5IHdpdGggaW50ZXJ2aWV3ZXIgc2tpbGxzL3ByZWZlcmVuY2VzIgogICAgICAgICAgICB0YWdzICJFeHRlcm5hbFN5c3RlbSIKICAgICAgICB9CgogICAgICAgIGxlYXZlUGxhbm5lciA9IHNvZnR3YXJlU3lzdGVtICJMZWF2ZSBQbGFubmVyIiB7CiAgICAgICAgICAgIGRlc2NyaXB0aW9uICJNYW5hZ2VzIGludGVydmlld2VyIGxlYXZlIGRhdGEiCiAgICAgICAgICAgIHRhZ3MgIkV4dGVybmFsU3lzdGVtIgogICAgICAgIH0KCiAgICAgICAgZ2NoYXQgPSBzb2Z0d2FyZVN5c3RlbSAiR29vZ2xlIENoYXQiIHsKICAgICAgICAgICAgZGVzY3JpcHRpb24gIkNoYXRib3QgaW50ZXJmYWNlIGFuZCBzY2hlZHVsaW5nIG5vdGlmaWNhdGlvbnMiCiAgICAgICAgICAgIHRhZ3MgIkV4dGVybmFsU3lzdGVtIgogICAgICAgIH0KCiAgICAgICAgZ2NhbCA9IHNvZnR3YXJlU3lzdGVtICJHb29nbGUgQ2FsZW5kYXIiIHsKICAgICAgICAgICAgZGVzY3JpcHRpb24gIlVzZWQgdG8gdmVyaWZ5IGludGVydmlld2VyIGF2YWlsYWJpbGl0eSBhbmQgc2VuZCBpbnZpdGVzIgogICAgICAgICAgICB0YWdzICJFeHRlcm5hbFN5c3RlbSIKICAgICAgICB9CgogICAgICAgIHJlY3J1aXR4ID0gc29mdHdhcmVTeXN0ZW0gIlJlY3J1aXRYIFBsYXRmb3JtIiB7CiAgICAgICAgICAgIGRlc2NyaXB0aW9uICJSZWNydWl0bWVudCBwbGF0Zm9ybSB0byBtYXRjaCwgc2NoZWR1bGUsIG5vdGlmeSwgYW5kIHRyYWNrIGludGVydmlld3MiCiAgICAgICAgICAgIHRhZ3MgIkNvcmVTeXN0ZW0iCiAgICAgICAgICAgIHJlY3J1aXRlciAtPiB0aGlzICJTY2hlZHVsZXMgaW50ZXJ2aWV3cyBhbmQgdmlld3MgcmVwb3J0cyIgewogICAgICAgICAgICAgICAgdGFncyAiSW50ZXJuYWxGbG93IgogICAgICAgICAgICB9CiAgICAgICAgICAgIHRoaXMgLT4gcmVjcnVpdGVyICJTZW5kcyB1cGRhdGVzLCBkYXNoYm9hcmRzLCByZXBvcnRzIiB7CiAgICAgICAgICAgICAgICB0YWdzICJJbnRlcm5hbEZsb3ciCiAgICAgICAgICAgIH0KICAgICAgICAgICAgY2FuZGlkYXRlIC0+IHRoaXMgIlNlbGVjdHMgc2xvdCB2aWEgR29vZFRpbWUgKGNhbGxiYWNrIGZsb3cpIiB7CiAgICAgICAgICAgICAgICB0YWdzICJFeHRlcm5hbEZsb3ciCiAgICAgICAgICAgIH0KICAgICAgICAgICAgdGhpcyAtPiBpbnRlcnZpZXdlciAiU2VuZHMgY2FsZW5kYXIgaW52aXRlcyBhbmQgbm90aWZpY2F0aW9ucyIgewogICAgICAgICAgICAgICAgdGFncyAiSW50ZXJuYWxGbG93IgogICAgICAgICAgICB9CiAgICAgICAgICAgIGludGVydmlld2VyIC0+IHRoaXMgIlJTVlBzIHZpYSBjYWxlbmRhciBvciBjaGF0IiB7CiAgICAgICAgICAgICAgICB0YWdzICJFeHRlcm5hbEZsb3ciCiAgICAgICAgICAgIH0KICAgICAgICB9CgogICAgICAgIC8vIEludGVybmFsIGluZnJhc3RydWN0dXJlCiAgICAgICAgZXZlbnRCdXMgPSBzb2Z0d2FyZVN5c3RlbSAiRXZlbnQgQnVzIChLYWZrYSAvIFB1YlN1YikiIHsKICAgICAgICAgICAgZGVzY3JpcHRpb24gIkludGVybmFsIGV2ZW50IGJyb2tlciBmb3IgbWljcm9zZXJ2aWNlcyIKICAgICAgICAgICAgdGFncyAiSW50ZXJuYWxJbmZyYSIKICAgICAgICAgICAgcmVjcnVpdHggLT4gdGhpcyAiUHVibGlzaGVzIGFuZCBjb25zdW1lcyBldmVudHMiIHsKICAgICAgICAgICAgICAgIHRhZ3MgIkludGVybmFsRmxvdyIKICAgICAgICAgICAgfQogICAgICAgIH0KCiAgICAgICAgLy8gRmxvd3MgdG8gZXh0ZXJuYWwgc3lzdGVtcwogICAgICAgIHJlY3J1aXR4IC0+IGdyZWVuaG91c2UgIkZldGNoZXMgY2FuZGlkYXRlIHN0YXR1cyBhbmQgdXBkYXRlcyBpbnRlcnZpZXciIHsKICAgICAgICAgICAgdGFncyAiRXh0ZXJuYWxGbG93IgogICAgICAgIH0KICAgICAgICByZWNydWl0eCAtPiBnb29kdGltZSAiR2VuZXJhdGVzIHNjaGVkdWxpbmcgbGluaywgcmVjZWl2ZXMgY2FsbGJhY2tzIiB7CiAgICAgICAgICAgIHRhZ3MgIkV4dGVybmFsRmxvdyIKICAgICAgICB9CiAgICAgICAgcmVjcnVpdHggLT4gamlnc2F3ICJGZXRjaGVzIGludGVydmlld2VyIHByb2ZpbGVzIiB7CiAgICAgICAgICAgIHRhZ3MgIkV4dGVybmFsRmxvdyIKICAgICAgICB9CiAgICAgICAgcmVjcnVpdHggLT4gbGVhdmVQbGFubmVyICJGZXRjaGVzIGxlYXZlIGRhdGEiIHsKICAgICAgICAgICAgdGFncyAiRXh0ZXJuYWxGbG93IgogICAgICAgIH0KICAgICAgICByZWNydWl0eCAtPiBnY2hhdCAiU2VuZHMgY2hhdCBtZXNzYWdlcywgcmVjZWl2ZXMgY2hhdGJvdCBxdWVyaWVzIiB7CiAgICAgICAgICAgIHRhZ3MgIkV4dGVybmFsRmxvdyIKICAgICAgICB9CiAgICAgICAgcmVjcnVpdHggLT4gZ2NhbCAiU2VuZHMgaW52aXRlcywgcmVjZWl2ZXMgUlNWUCB1cGRhdGVzIiB7CiAgICAgICAgICAgIHRhZ3MgIkV4dGVybmFsRmxvdyIKICAgICAgICB9CiAgICB9CgogICAgdmlld3MgewogICAgICAgIHN5c3RlbUNvbnRleHQgcmVjcnVpdHggewogICAgICAgICAgICBpbmNsdWRlICoKICAgICAgICAgICAgdGl0bGUgIlJlY3J1aXRYIC0gU3lzdGVtIENvbnRleHQiCiAgICAgICAgfQoKCiAgICAgICAgc3R5bGVzIHsKICAgICAgICAgICAgZWxlbWVudCAiUGVyc29uIiB7CiAgICAgICAgICAgICAgICBzaGFwZSBwZXJzb24KICAgICAgICAgICAgICAgIGJhY2tncm91bmQgIzBENDdBMQogICAgICAgICAgICAgICAgY29sb3IgI2ZmZmZmZgogICAgICAgICAgICAgICAgZm9udFNpemUgMTgKICAgICAgICAgICAgfQoKICAgICAgICAgICAgZWxlbWVudCAiQ29yZVN5c3RlbSIgewogICAgICAgICAgICAgICAgc2hhcGUgcm91bmRlZGJveAogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjMTU2NUMwCiAgICAgICAgICAgICAgICBjb2xvciAjZmZmZmZmCiAgICAgICAgICAgICAgICBmb250U2l6ZSAxOAogICAgICAgICAgICB9CgogICAgICAgICAgICBlbGVtZW50ICJFeHRlcm5hbFN5c3RlbSIgewogICAgICAgICAgICAgICAgc2hhcGUgcm91bmRlZGJveAogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjRTFCRUU3CiAgICAgICAgICAgICAgICBjb2xvciAjMDAwMDAwCiAgICAgICAgICAgICAgICBmb250U2l6ZSAxNgogICAgICAgICAgICB9CgogICAgICAgICAgICBlbGVtZW50ICJJbnRlcm5hbEluZnJhIiB7CiAgICAgICAgICAgICAgICBzaGFwZSByb3VuZGVkYm94CiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kICNDMEQ5RkYKICAgICAgICAgICAgICAgIGNvbG9yICMwMDAwMDAKICAgICAgICAgICAgICAgIGZvbnRTaXplIDE2CiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIHJlbGF0aW9uc2hpcCAiSW50ZXJuYWxGbG93IiB7CiAgICAgICAgICAgICAgICBjb2xvciAjMTk3NkQyCiAgICAgICAgICAgICAgICB0aGlja25lc3MgMwogICAgICAgICAgICAgICAgc3R5bGUgc29saWQKICAgICAgICAgICAgICAgIGZvbnRTaXplIDE0CiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIHJlbGF0aW9uc2hpcCAiRXh0ZXJuYWxGbG93IiB7CiAgICAgICAgICAgICAgICBjb2xvciAjOUMyN0IwCiAgICAgICAgICAgICAgICB0aGlja25lc3MgMgogICAgICAgICAgICAgICAgc3R5bGUgZGFzaGVkCiAgICAgICAgICAgICAgICBmb250U2l6ZSAxMwogICAgICAgICAgICB9CiAgICAgICAgfQogICAgfQp9"
+    "structurizr.dsl" : "d29ya3NwYWNlIHsKCiAgICBtb2RlbCB7CiAgICAgICAgcmVjcnVpdGVyID0gcGVyc29uICJSZWNydWl0ZXIiIHsKICAgICAgICAgICAgZGVzY3JpcHRpb24gIlNjaGVkdWxlcyBpbnRlcnZpZXdzLCBpbnRlcmFjdHMgd2l0aCBjaGF0Ym90LCBtb25pdG9ycyBzdGF0dXMsIGFuZCB1c2VzIGRhc2hib2FyZCIKICAgICAgICAgICAgdGFncyAiUGVyc29uIgogICAgICAgIH0KCiAgICAgICAgY2FuZGlkYXRlID0gcGVyc29uICJDYW5kaWRhdGUiIHsKICAgICAgICAgICAgZGVzY3JpcHRpb24gIlNlbGVjdHMgaW50ZXJ2aWV3IHNsb3QgZnJvbSBzY2hlZHVsaW5nIGxpbmsiCiAgICAgICAgICAgIHRhZ3MgIlBlcnNvbiIKICAgICAgICB9CgogICAgICAgIGludGVydmlld2VyID0gcGVyc29uICJJbnRlcnZpZXdlciIgewogICAgICAgICAgICBkZXNjcmlwdGlvbiAiQ29uZHVjdHMgaW50ZXJ2aWV3cywgcmVzcG9uZHMgdmlhIGNhbGVuZGFyIG9yIGNoYXQiCiAgICAgICAgICAgIHRhZ3MgIlBlcnNvbiIKICAgICAgICB9CgogICAgICAgIC8vIEV4dGVybmFsIHN5c3RlbXMKICAgICAgICBncmVlbmhvdXNlID0gc29mdHdhcmVTeXN0ZW0gIkdyZWVuaG91c2UiIHsKICAgICAgICAgICAgZGVzY3JpcHRpb24gIkFUUyB1c2VkIGZvciB0cmFja2luZyBjYW5kaWRhdGVzIGFuZCBpbnRlcnZpZXcgZmVlZGJhY2suIgogICAgICAgICAgICB0YWdzICJFeHRlcm5hbFN5c3RlbSIKICAgICAgICB9CgogICAgICAgIGdvb2R0aW1lID0gc29mdHdhcmVTeXN0ZW0gIkdvb2RUaW1lIiB7CiAgICAgICAgICAgIGRlc2NyaXB0aW9uICJUb29sIHRvIGdlbmVyYXRlIHNjaGVkdWxpbmcgbGlua3MgYW5kIG1hbmFnZSBpbnRlcnZpZXdlciBwcmVmZXJlbmNlcy4iCiAgICAgICAgICAgIHRhZ3MgIkV4dGVybmFsU3lzdGVtIgogICAgICAgIH0KCiAgICAgICAgamlnc2F3ID0gc29mdHdhcmVTeXN0ZW0gIkppZ3NhdyIgewogICAgICAgICAgICBkZXNjcmlwdGlvbiAiSW50ZXJuYWwgZGlyZWN0b3J5IHdpdGggaW50ZXJ2aWV3ZXIgc2tpbGxzL3ByZWZlcmVuY2VzIgogICAgICAgICAgICB0YWdzICJFeHRlcm5hbFN5c3RlbSIKICAgICAgICB9CgogICAgICAgIGxlYXZlUGxhbm5lciA9IHNvZnR3YXJlU3lzdGVtICJMZWF2ZSBQbGFubmVyIiB7CiAgICAgICAgICAgIGRlc2NyaXB0aW9uICJNYW5hZ2VzIGludGVydmlld2VyIGxlYXZlIGRhdGEiCiAgICAgICAgICAgIHRhZ3MgIkV4dGVybmFsU3lzdGVtIgogICAgICAgIH0KCiAgICAgICAgZ2NoYXQgPSBzb2Z0d2FyZVN5c3RlbSAiR29vZ2xlIENoYXQiIHsKICAgICAgICAgICAgZGVzY3JpcHRpb24gIkNoYXRib3QgaW50ZXJmYWNlIGFuZCBzY2hlZHVsaW5nIG5vdGlmaWNhdGlvbnMiCiAgICAgICAgICAgIHRhZ3MgIkV4dGVybmFsU3lzdGVtIgogICAgICAgIH0KCiAgICAgICAgZ2NhbCA9IHNvZnR3YXJlU3lzdGVtICJHb29nbGUgQ2FsZW5kYXIiIHsKICAgICAgICAgICAgZGVzY3JpcHRpb24gIlVzZWQgdG8gdmVyaWZ5IGludGVydmlld2VyIGF2YWlsYWJpbGl0eSBhbmQgc2VuZCBpbnZpdGVzIgogICAgICAgICAgICB0YWdzICJFeHRlcm5hbFN5c3RlbSIKICAgICAgICB9CgogICAgICAgIHJlY3J1aXR4ID0gc29mdHdhcmVTeXN0ZW0gIlJlY3J1aXRYIFBsYXRmb3JtIiB7CiAgICAgICAgICAgIGRlc2NyaXB0aW9uICJSZWNydWl0bWVudCBwbGF0Zm9ybSB0byBtYXRjaCwgc2NoZWR1bGUsIG5vdGlmeSwgYW5kIHRyYWNrIGludGVydmlld3MiCiAgICAgICAgICAgIHRhZ3MgIkNvcmVTeXN0ZW0iCgogICAgICAgICAgICBjaGF0Ym90ID0gY29udGFpbmVyICJDaGF0Ym90IFNlcnZpY2UiIHsKICAgICAgICAgICAgICAgIHRlY2hub2xvZ3kgIlB5dGhvbiArIEZhc3RBUEkgKyBMYW5nQ2hhaW4iCiAgICAgICAgICAgICAgICBkZXNjcmlwdGlvbiAiQ29udmVyc2F0aW9uYWwgaW50ZXJmYWNlIGZvciByZWNydWl0ZXJzIHRvIHF1ZXJ5IGludGVydmlld2VyIGF2YWlsYWJpbGl0eSwgaW5pdGlhdGUgc2NoZWR1bGluZywgYW5kIGdldCB1cGRhdGVzIgogICAgICAgICAgICB9CgogICAgICAgICAgICBkYXNoYm9hcmQgPSBjb250YWluZXIgIkRhc2hib2FyZCBTZXJ2aWNlIiB7CiAgICAgICAgICAgICAgICB0ZWNobm9sb2d5ICJGbHV0dGVyICsgUkVTVCBBUEkiCiAgICAgICAgICAgICAgICBkZXNjcmlwdGlvbiAiV2ViIFVJIHRvIHZpZXcgc3RhdHVzLCByZXBvcnRzLCBpbml0aWF0ZSBpbnRlcnZpZXdzIgogICAgICAgICAgICB9CgogICAgICAgICAgICBwcm9maWxlU2VydmljZSA9IGNvbnRhaW5lciAiSW50ZXJ2aWV3ZXIgUHJvZmlsZSBTZXJ2aWNlIiB7CiAgICAgICAgICAgICAgICB0ZWNobm9sb2d5ICJQeXRob24gKyBGYXN0QVBJICsgUmVkaXMiCiAgICAgICAgICAgICAgICBkZXNjcmlwdGlvbiAiRmV0Y2hlcyBhbmQgc2VydmVzIGludGVydmlld2VyIG1ldGFkYXRhIChza2lsbHMsIGdyYWRlLCB0aW1lem9uZSkiCiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIGNhbmRpZGF0ZVNlcnZpY2UgPSBjb250YWluZXIgIkNhbmRpZGF0ZSBJbnNpZ2h0cyBTZXJ2aWNlIiB7CiAgICAgICAgICAgICAgICB0ZWNobm9sb2d5ICJQeXRob24gKyBGYXN0QVBJICsgUmVkaXMiCiAgICAgICAgICAgICAgICBkZXNjcmlwdGlvbiAiRmV0Y2hlcyBhbmQgc2VydmVzIGNhbmRpZGF0ZSBwcm9maWxlcyBhbmQgcHJlZmVyZW5jZXMiCiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIHByZWZlcmVuY2VzU2VydmljZSA9IGNvbnRhaW5lciAiSW50ZXJ2aWV3ZXIgUHJlZmVyZW5jZXMgU2VydmljZSIgewogICAgICAgICAgICAgICAgdGVjaG5vbG9neSAiUHl0aG9uICsgRmFzdEFQSSArIFJlZGlzIgogICAgICAgICAgICAgICAgZGVzY3JpcHRpb24gIk1hbmFnZXMgaW50ZXJ2aWV3ZXIncyBhdmFpbGFiaWxpdHkgcHJlZmVyZW5jZXMsIGJsb2NrL3NhdmVsaXN0IGxvZ2ljIgogICAgICAgICAgICB9CgogICAgICAgICAgICBhdmFpbGFiaWxpdHlTZXJ2aWNlID0gY29udGFpbmVyICJBdmFpbGFiaWxpdHkgRXZhbHVhdG9yIFNlcnZpY2UiIHsKICAgICAgICAgICAgICAgIHRlY2hub2xvZ3kgIkdvICsgRmliZXIgKyBHb29nbGUgQ2FsZW5kYXIgQVBJIgogICAgICAgICAgICAgICAgZGVzY3JpcHRpb24gIkV2YWx1YXRlcyBzbG90LWxldmVsIGF2YWlsYWJpbGl0eSB1c2luZyBHb29nbGUgQ2FsZW5kYXIgYW5kIExlYXZlIFBsYW5uZXIiCiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIGNvbmZpZ1NlcnZpY2UgPSBjb250YWluZXIgIlNjaGVkdWxpbmcgQ29uZmlnIFNlcnZpY2UiIHsKICAgICAgICAgICAgICAgIHRlY2hub2xvZ3kgIlB5dGhvbiArIEZhc3RBUEkgKyBQb3N0Z3JlU1FMIgogICAgICAgICAgICAgICAgZGVzY3JpcHRpb24gIk1hbmFnZXMgbWF0Y2hlciBkaW1lbnNpb24gd2VpZ2h0cywgcHJvY2Vzc2luZyBsb2dpYywgYW5kIHJ1bnRpbWUgb3ZlcnJpZGVzIgogICAgICAgICAgICB9CgogICAgICAgICAgICBtYXRjaGVyID0gY29udGFpbmVyICJNYXRjaGVyICYgU2VsZWN0b3IgU2VydmljZSIgewogICAgICAgICAgICAgICAgdGVjaG5vbG9neSAiR28gKyBGaWJlciArIFJlZGlzIgogICAgICAgICAgICAgICAgZGVzY3JpcHRpb24gIlNjb3JlcyBhbmQgcmFua3MgYmVzdC1maXQgaW50ZXJ2aWV3ZXJzIGZvciBhIGNhbmRpZGF0ZSBiYXNlZCBvbiBtdWx0aXBsZSBkaW1lbnNpb25zIgogICAgICAgICAgICB9CgogICAgICAgICAgICBzbG90U3VnZ2VzdGVyID0gY29udGFpbmVyICJTbG90IFJlY29tbWVuZGVyIFNlcnZpY2UiIHsKICAgICAgICAgICAgICAgIHRlY2hub2xvZ3kgIkdvICsgRmliZXIiCiAgICAgICAgICAgICAgICBkZXNjcmlwdGlvbiAiU3VnZ2VzdHMgb3B0aW1hbCBpbnRlcnZpZXcgdGltZSBzbG90cyBiYXNlZCBvbiBwcmVmZXJlbmNlcyBhbmQgYXZhaWxhYmlsaXR5IgogICAgICAgICAgICB9CgogICAgICAgICAgICByZXBvcnRpbmdTZXJ2aWNlID0gY29udGFpbmVyICJSZXBvcnRpbmcgJiBBbmFseXRpY3MgU2VydmljZSIgewogICAgICAgICAgICAgICAgdGVjaG5vbG9neSAiUHl0aG9uICsgRmFzdEFQSSArIEVUTCArIFBvc3RncmVTUUwgKyBHcmFmYW5hIgogICAgICAgICAgICAgICAgZGVzY3JpcHRpb24gIlJ1bnMgRVRMLCBnZW5lcmF0ZXMgYW5hbHl0aWNzIGRhc2hib2FyZHMsIG1ldHJpY3MgYW5kIGhpc3RvcnkgcmVwb3J0cyIKICAgICAgICAgICAgfQoKICAgICAgICAgICAgLy8gICAgICAgICAgICBldmVudEJ1cyA9IGNvbnRhaW5lciAiRXZlbnQgQnVzIiB7CiAgICAgICAgICAgIC8vICAgICAgICAgICAgICAgIHRlY2hub2xvZ3kgIkdvICsgS2Fma2EgLyBHb29nbGUgUHViU3ViIENsaWVudCIKICAgICAgICAgICAgLy8gICAgICAgICAgICAgICAgZGVzY3JpcHRpb24gIk1pY3Jvc2VydmljZSBjb21tdW5pY2F0aW9uIGFuZCBkb21haW4gZXZlbnQgZmxvdyIKICAgICAgICAgICAgLy8gICAgICAgICAgICB9CgogICAgICAgICAgICBhdXRoR2F0ZXdheSA9IGNvbnRhaW5lciAiQXV0aCBHYXRld2F5IiB7CiAgICAgICAgICAgICAgICB0ZWNobm9sb2d5ICJHbyArIE9JREMgKyBBUEkgR2F0ZXdheSIKICAgICAgICAgICAgICAgIGRlc2NyaXB0aW9uICJIYW5kbGVzIGF1dGhlbnRpY2F0aW9uIChPa3RhIFNTTyksIHJvdXRlcyBhbmQgZW5mb3JjZXMgUkJBQyIKICAgICAgICAgICAgfQoKICAgICAgICAgICAgcmVjcnVpdGVyIC0+IHRoaXMgIlNjaGVkdWxlcyBpbnRlcnZpZXdzIGFuZCB2aWV3cyByZXBvcnRzIiB7CiAgICAgICAgICAgICAgICB0YWdzICJJbnRlcm5hbEZsb3ciCiAgICAgICAgICAgIH0KICAgICAgICAgICAgdGhpcyAtPiByZWNydWl0ZXIgIlNlbmRzIHVwZGF0ZXMsIGRhc2hib2FyZHMsIHJlcG9ydHMiIHsKICAgICAgICAgICAgICAgIHRhZ3MgIkludGVybmFsRmxvdyIKICAgICAgICAgICAgfQogICAgICAgICAgICBjYW5kaWRhdGUgLT4gdGhpcyAiU2VsZWN0cyBzbG90IHZpYSBHb29kVGltZSAoY2FsbGJhY2sgZmxvdykiIHsKICAgICAgICAgICAgICAgIHRhZ3MgIkV4dGVybmFsRmxvdyIKICAgICAgICAgICAgfQogICAgICAgICAgICB0aGlzIC0+IGludGVydmlld2VyICJTZW5kcyBjYWxlbmRhciBpbnZpdGVzIGFuZCBub3RpZmljYXRpb25zIiB7CiAgICAgICAgICAgICAgICB0YWdzICJJbnRlcm5hbEZsb3ciCiAgICAgICAgICAgIH0KICAgICAgICAgICAgaW50ZXJ2aWV3ZXIgLT4gdGhpcyAiUlNWUHMgdmlhIGNhbGVuZGFyIG9yIGNoYXQiIHsKICAgICAgICAgICAgICAgIHRhZ3MgIkV4dGVybmFsRmxvdyIKICAgICAgICAgICAgfQogICAgICAgIH0KCiAgICAgICAgLy8gSW50ZXJuYWwgaW5mcmFzdHJ1Y3R1cmUKICAgICAgICBldmVudEJ1cyA9IHNvZnR3YXJlU3lzdGVtICJFdmVudCBCdXMgKEthZmthIC8gUHViU3ViKSIgewogICAgICAgICAgICBkZXNjcmlwdGlvbiAiSW50ZXJuYWwgZXZlbnQgYnJva2VyIGZvciBtaWNyb3NlcnZpY2VzIgogICAgICAgICAgICB0YWdzICJJbnRlcm5hbEluZnJhIgogICAgICAgICAgICByZWNydWl0eCAtPiB0aGlzICJQdWJsaXNoZXMgYW5kIGNvbnN1bWVzIGV2ZW50cyIgewogICAgICAgICAgICAgICAgdGFncyAiSW50ZXJuYWxGbG93IgogICAgICAgICAgICB9CiAgICAgICAgfQoKICAgICAgICAvLyBGbG93cyB0byBleHRlcm5hbCBzeXN0ZW1zCiAgICAgICAgcmVjcnVpdHggLT4gZ3JlZW5ob3VzZSAiRmV0Y2hlcyBjYW5kaWRhdGUgc3RhdHVzIGFuZCB1cGRhdGVzIGludGVydmlldyIgewogICAgICAgICAgICB0YWdzICJFeHRlcm5hbEZsb3ciCiAgICAgICAgfQogICAgICAgIHJlY3J1aXR4IC0+IGdvb2R0aW1lICJHZW5lcmF0ZXMgc2NoZWR1bGluZyBsaW5rLCByZWNlaXZlcyBjYWxsYmFja3MiIHsKICAgICAgICAgICAgdGFncyAiRXh0ZXJuYWxGbG93IgogICAgICAgIH0KICAgICAgICByZWNydWl0eCAtPiBqaWdzYXcgIkZldGNoZXMgaW50ZXJ2aWV3ZXIgcHJvZmlsZXMiIHsKICAgICAgICAgICAgdGFncyAiRXh0ZXJuYWxGbG93IgogICAgICAgIH0KICAgICAgICByZWNydWl0eCAtPiBsZWF2ZVBsYW5uZXIgIkZldGNoZXMgbGVhdmUgZGF0YSIgewogICAgICAgICAgICB0YWdzICJFeHRlcm5hbEZsb3ciCiAgICAgICAgfQogICAgICAgIHJlY3J1aXR4IC0+IGdjaGF0ICJTZW5kcyBjaGF0IG1lc3NhZ2VzLCByZWNlaXZlcyBjaGF0Ym90IHF1ZXJpZXMiIHsKICAgICAgICAgICAgdGFncyAiRXh0ZXJuYWxGbG93IgogICAgICAgIH0KICAgICAgICByZWNydWl0eCAtPiBnY2FsICJTZW5kcyBpbnZpdGVzLCByZWNlaXZlcyBSU1ZQIHVwZGF0ZXMiIHsKICAgICAgICAgICAgdGFncyAiRXh0ZXJuYWxGbG93IgogICAgICAgIH0KCgogICAgICAgIC8vIEV4dGVybmFsIGludGVncmF0aW9ucwogICAgICAgIHByb2ZpbGVTZXJ2aWNlIC0+IGppZ3NhdyAiRmV0Y2hlcyBpbnRlcnZpZXdlciBkYXRhIgogICAgICAgIGNhbmRpZGF0ZVNlcnZpY2UgLT4gZ3JlZW5ob3VzZSAiRmV0Y2hlcyBjYW5kaWRhdGUgcHJvZmlsZSIKICAgICAgICBwcmVmZXJlbmNlc1NlcnZpY2UgLT4gZ29vZHRpbWUgIkZldGNoZXMgcm91bmQvdGltZSBwcmVmZXJlbmNlcyIKICAgICAgICBkYXNoYm9hcmQgLT4gZ3JlZW5ob3VzZSAiVXBkYXRlcyBpbnRlcnZpZXcgcmVjb3JkcyIKICAgICAgICByZXBvcnRpbmdTZXJ2aWNlIC0+IGdjaGF0ICJTZW5kcyByZXBvcnRzL2FsZXJ0cyIKICAgICAgICBhdmFpbGFiaWxpdHlTZXJ2aWNlIC0+IGdjYWwgIlJlYWRzIGNhbGVuZGFyLCBzZW5kcyBpbnZpdGVzIgogICAgICAgIGF2YWlsYWJpbGl0eVNlcnZpY2UgLT4gbGVhdmVQbGFubmVyICJSZWFkcyBsZWF2ZSBkYXRhIgogICAgICAgIGNoYXRib3QgLT4gZ2NoYXQgIlJlY2VpdmVzIGNoYXQgcXVlcmllcyIKCiAgICAgICAgLy8gSW50ZXJuYWwgaW50ZXJhY3Rpb25zCiAgICAgICAgcmVjcnVpdGVyIC0+IGNoYXRib3QgIkFza3MgZm9yIGF2YWlsYWJpbGl0eSwgaW5pdGlhdGVzIHNjaGVkdWxpbmciCiAgICAgICAgcmVjcnVpdGVyIC0+IGRhc2hib2FyZCAiTWFuYWdlcyBhbmQgdHJhY2tzIGludGVydmlld3MiCiAgICAgICAgZGFzaGJvYXJkIC0+IG1hdGNoZXIgIlJlcXVlc3RzIGJlc3QgaW50ZXJ2aWV3ZXIgbWF0Y2hlcyIKICAgICAgICBkYXNoYm9hcmQgLT4gc2xvdFN1Z2dlc3RlciAiRmV0Y2hlcyBhdmFpbGFibGUgc2xvdHMiCgogICAgICAgIGNoYXRib3QgLT4gbWF0Y2hlciAiUmVxdWVzdHMgaW50ZXJ2aWV3ZXIgc3VnZ2VzdGlvbnMiCiAgICAgICAgY2hhdGJvdCAtPiBzbG90U3VnZ2VzdGVyICJGZXRjaGVzIHNsb3Qgc3VnZ2VzdGlvbnMiCiAgICAgICAgY2hhdGJvdCAtPiBhdmFpbGFiaWxpdHlTZXJ2aWNlICJDb25maXJtcyBhdmFpbGFiaWxpdHkiCgogICAgICAgIG1hdGNoZXIgLT4gY29uZmlnU2VydmljZSAiRmV0Y2hlcyBtYXRjaGVyIGNvbmZpZyIKICAgICAgICBtYXRjaGVyIC0+IHByb2ZpbGVTZXJ2aWNlICJGZXRjaGVzIGludGVydmlld2VyIHByb2ZpbGUiCiAgICAgICAgbWF0Y2hlciAtPiBjYW5kaWRhdGVTZXJ2aWNlICJGZXRjaGVzIGNhbmRpZGF0ZSBwcm9maWxlIgogICAgICAgIG1hdGNoZXIgLT4gcHJlZmVyZW5jZXNTZXJ2aWNlICJGZXRjaGVzIHByZWZlcmVuY2VzIgogICAgICAgIG1hdGNoZXIgLT4gYXZhaWxhYmlsaXR5U2VydmljZSAiQ2hlY2tzIGF2YWlsYWJpbGl0eSIKCiAgICAgICAgc2xvdFN1Z2dlc3RlciAtPiBtYXRjaGVyICJHZXRzIHRvcCBpbnRlcnZpZXdlcnMiCiAgICAgICAgc2xvdFN1Z2dlc3RlciAtPiBhdmFpbGFiaWxpdHlTZXJ2aWNlICJGZXRjaGVzIHNsb3RzIgogICAgICAgIHNsb3RTdWdnZXN0ZXIgLT4gcHJlZmVyZW5jZXNTZXJ2aWNlICJBcHBsaWVzIHByZWZlcmVuY2UgZmlsdGVycyIKCiAgICAgICAgYXZhaWxhYmlsaXR5U2VydmljZSAtPiBwcmVmZXJlbmNlc1NlcnZpY2UgIlVzZXMgYmxvY2svc2F2ZWxpc3QiCiAgICAgICAgYXZhaWxhYmlsaXR5U2VydmljZSAtPiBnY2FsICJVc2VzIEdvb2dsZSBDYWxlbmRhciBBUEkiCiAgICAgICAgYXZhaWxhYmlsaXR5U2VydmljZSAtPiBsZWF2ZVBsYW5uZXIgIkNoZWNrcyBsZWF2ZSBzdGF0dXMiCgogICAgICAgIHJlcG9ydGluZ1NlcnZpY2UgLT4gZXZlbnRCdXMgIkNvbnN1bWVzIHN5c3RlbSBldmVudHMiCiAgICAgICAgY2hhdGJvdCAtPiBldmVudEJ1cyAiUHVibGlzaGVzIHF1ZXJ5L3JlcXVlc3QgZXZlbnRzIgogICAgICAgIGRhc2hib2FyZCAtPiBldmVudEJ1cyAiUHVibGlzaGVzIHVzZXIgYWN0aW9ucyIKICAgICAgICBtYXRjaGVyIC0+IGV2ZW50QnVzICJQdWJsaXNoZXMgbWF0Y2ggc3VnZ2VzdGlvbnMiCiAgICAgICAgc2xvdFN1Z2dlc3RlciAtPiBldmVudEJ1cyAiUHVibGlzaGVzIHNsb3QgcmVjb21tZW5kYXRpb25zIgogICAgICAgIGF2YWlsYWJpbGl0eVNlcnZpY2UgLT4gZXZlbnRCdXMgIlB1Ymxpc2hlcyBhdmFpbGFiaWxpdHkgc3RhdHVzIgogICAgICAgIHByZWZlcmVuY2VzU2VydmljZSAtPiBldmVudEJ1cyAiUHVibGlzaGVzIHByZWZlcmVuY2UgY2hhbmdlcyIKICAgICAgICBwcm9maWxlU2VydmljZSAtPiBldmVudEJ1cyAiUHVibGlzaGVzIHByb2ZpbGUgdXBkYXRlcyIKICAgICAgICByZXBvcnRpbmdTZXJ2aWNlIC0+IGV2ZW50QnVzICJQdWJsaXNoZXMgcmVwb3J0cyBnZW5lcmF0ZWQiCiAgICAgICAgLy8gICAgICAgIGF1dGhHYXRld2F5IC0+IGFsbENvbnRhaW5lcnMgIkVuZm9yY2VzIGF1dGggJiByb3V0ZXMiCiAgICB9CgogICAgdmlld3MgewogICAgICAgIHN5c3RlbUNvbnRleHQgcmVjcnVpdHggewogICAgICAgICAgICBpbmNsdWRlICoKICAgICAgICAgICAgdGl0bGUgIlJlY3J1aXRYIC0gU3lzdGVtIENvbnRleHQiCiAgICAgICAgfQoKICAgICAgICBjb250YWluZXIgcmVjcnVpdHggewogICAgICAgICAgICBpbmNsdWRlICoKICAgICAgICAgICAgYXV0b2xheW91dCBscgogICAgICAgICAgICB0aXRsZSAiUmVjcnVpdFggUGxhdGZvcm0g4oCTIENvbnRhaW5lciBWaWV3IChQeXRob24gKyBHbyBIeWJyaWQpIgogICAgICAgIH0KCiAgICAgICAgc3R5bGVzIHsKICAgICAgICAgICAgZWxlbWVudCAiUGVyc29uIiB7CiAgICAgICAgICAgICAgICBzaGFwZSBwZXJzb24KICAgICAgICAgICAgICAgIGJhY2tncm91bmQgIzBENDdBMQogICAgICAgICAgICAgICAgY29sb3IgI2ZmZmZmZgogICAgICAgICAgICAgICAgZm9udFNpemUgMTgKICAgICAgICAgICAgfQoKICAgICAgICAgICAgZWxlbWVudCAiQ29yZVN5c3RlbSIgewogICAgICAgICAgICAgICAgc2hhcGUgcm91bmRlZGJveAogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjMTU2NUMwCiAgICAgICAgICAgICAgICBjb2xvciAjZmZmZmZmCiAgICAgICAgICAgICAgICBmb250U2l6ZSAxOAogICAgICAgICAgICB9CgogICAgICAgICAgICBlbGVtZW50ICJFeHRlcm5hbFN5c3RlbSIgewogICAgICAgICAgICAgICAgc2hhcGUgcm91bmRlZGJveAogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjRTFCRUU3CiAgICAgICAgICAgICAgICBjb2xvciAjMDAwMDAwCiAgICAgICAgICAgICAgICBmb250U2l6ZSAxNgogICAgICAgICAgICB9CgogICAgICAgICAgICBlbGVtZW50ICJJbnRlcm5hbEluZnJhIiB7CiAgICAgICAgICAgICAgICBzaGFwZSByb3VuZGVkYm94CiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kICNDMEQ5RkYKICAgICAgICAgICAgICAgIGNvbG9yICMwMDAwMDAKICAgICAgICAgICAgICAgIGZvbnRTaXplIDE2CiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIGVsZW1lbnQgIkNvbnRhaW5lciIgewogICAgICAgICAgICAgICAgc2hhcGUgcm91bmRlZGJveAogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjRDhFQkZGCiAgICAgICAgICAgICAgICBjb2xvciAjMDAwMDAwCiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIHJlbGF0aW9uc2hpcCAiSW50ZXJuYWxGbG93IiB7CiAgICAgICAgICAgICAgICBjb2xvciAjMTk3NkQyCiAgICAgICAgICAgICAgICB0aGlja25lc3MgMwogICAgICAgICAgICAgICAgc3R5bGUgc29saWQKICAgICAgICAgICAgICAgIGZvbnRTaXplIDE0CiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIHJlbGF0aW9uc2hpcCAiRXh0ZXJuYWxGbG93IiB7CiAgICAgICAgICAgICAgICBjb2xvciAjOUMyN0IwCiAgICAgICAgICAgICAgICB0aGlja25lc3MgMgogICAgICAgICAgICAgICAgc3R5bGUgZGFzaGVkCiAgICAgICAgICAgICAgICBmb250U2l6ZSAxMwogICAgICAgICAgICB9CiAgICAgICAgfQogICAgfQp9"
   },
   "views" : {
     "configuration" : {
       "branding" : { },
       "lastSavedView" : "SystemContext-001",
+      "metadataSymbols" : "SquareBrackets",
       "styles" : {
         "elements" : [ {
           "background" : "#0d47a1",
@@ -224,6 +556,11 @@
           "fontSize" : 16,
           "shape" : "RoundedBox",
           "tag" : "InternalInfra"
+        }, {
+          "background" : "#d8ebff",
+          "color" : "#000000",
+          "shape" : "RoundedBox",
+          "tag" : "Container"
         } ],
         "relationships" : [ {
           "color" : "#1976d2",
@@ -241,6 +578,336 @@
       },
       "terminology" : { }
     },
+    "containerViews" : [ {
+      "automaticLayout" : {
+        "applied" : true,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "dimensions" : {
+        "height" : 9584,
+        "width" : 5300
+      },
+      "elements" : [ {
+        "id" : "1",
+        "x" : 199,
+        "y" : 6015
+      }, {
+        "id" : "4",
+        "x" : 3899,
+        "y" : 8290
+      }, {
+        "id" : "5",
+        "x" : 4649,
+        "y" : 5761
+      }, {
+        "id" : "6",
+        "x" : 3899,
+        "y" : 4553
+      }, {
+        "id" : "7",
+        "x" : 3899,
+        "y" : 2744
+      }, {
+        "id" : "8",
+        "x" : 1649,
+        "y" : 7986
+      }, {
+        "id" : "9",
+        "x" : 3899,
+        "y" : 3344
+      }, {
+        "id" : "11",
+        "x" : 899,
+        "y" : 5740
+      }, {
+        "id" : "12",
+        "x" : 899,
+        "y" : 6407
+      }, {
+        "id" : "13",
+        "x" : 3149,
+        "y" : 7169
+      }, {
+        "id" : "14",
+        "x" : 3149,
+        "y" : 5969
+      }, {
+        "id" : "15",
+        "x" : 3899,
+        "y" : 5761
+      }, {
+        "id" : "16",
+        "x" : 3149,
+        "y" : 5061
+      }, {
+        "id" : "17",
+        "x" : 3149,
+        "y" : 6569
+      }, {
+        "id" : "18",
+        "x" : 2399,
+        "y" : 5953
+      }, {
+        "id" : "19",
+        "x" : 1649,
+        "y" : 5953
+      }, {
+        "id" : "20",
+        "x" : 899,
+        "y" : 5061
+      }, {
+        "id" : "21",
+        "x" : 899,
+        "y" : 7232
+      }, {
+        "id" : "27",
+        "x" : 4649,
+        "y" : 1836
+      } ],
+      "externalSoftwareSystemBoundariesVisible" : false,
+      "generatedKey" : true,
+      "key" : "Container-001",
+      "order" : 2,
+      "relationships" : [ {
+        "id" : "35",
+        "vertices" : [ {
+          "x" : 3599,
+          "y" : 7019
+        }, {
+          "x" : 3899,
+          "y" : 4882
+        } ]
+      }, {
+        "id" : "36",
+        "vertices" : [ {
+          "x" : 3599,
+          "y" : 6419
+        }, {
+          "x" : 3899,
+          "y" : 7957
+        } ]
+      }, {
+        "id" : "37"
+      }, {
+        "id" : "38",
+        "vertices" : [ {
+          "x" : 1349,
+          "y" : 7082
+        }, {
+          "x" : 1649,
+          "y" : 8436
+        } ]
+      }, {
+        "id" : "39",
+        "vertices" : [ {
+          "x" : 1349,
+          "y" : 5590
+        }, {
+          "x" : 1649,
+          "y" : 7957
+        } ]
+      }, {
+        "id" : "40",
+        "vertices" : [ {
+          "x" : 3899,
+          "y" : 4019
+        } ]
+      }, {
+        "id" : "41",
+        "vertices" : [ {
+          "x" : 3899,
+          "y" : 3344
+        } ]
+      }, {
+        "id" : "42",
+        "vertices" : [ {
+          "x" : 1349,
+          "y" : 6257
+        }, {
+          "x" : 1649,
+          "y" : 7957
+        } ]
+      }, {
+        "id" : "43"
+      }, {
+        "id" : "44"
+      }, {
+        "id" : "45",
+        "vertices" : [ {
+          "x" : 2099,
+          "y" : 6403
+        } ]
+      }, {
+        "id" : "46"
+      }, {
+        "id" : "47",
+        "vertices" : [ {
+          "x" : 1649,
+          "y" : 5803
+        }, {
+          "x" : 2099,
+          "y" : 5803
+        } ]
+      }, {
+        "id" : "48"
+      }, {
+        "id" : "49",
+        "vertices" : [ {
+          "x" : 1649,
+          "y" : 5724
+        } ]
+      }, {
+        "id" : "50"
+      }, {
+        "id" : "51",
+        "vertices" : [ {
+          "x" : 3149,
+          "y" : 7019
+        } ]
+      }, {
+        "id" : "52"
+      }, {
+        "id" : "53",
+        "vertices" : [ {
+          "x" : 3149,
+          "y" : 5819
+        }, {
+          "x" : 3599,
+          "y" : 5819
+        } ]
+      }, {
+        "id" : "54"
+      }, {
+        "id" : "55"
+      }, {
+        "id" : "56"
+      }, {
+        "id" : "57",
+        "vertices" : [ {
+          "x" : 3149,
+          "y" : 7619
+        }, {
+          "x" : 3599,
+          "y" : 7619
+        } ]
+      }, {
+        "id" : "58"
+      }, {
+        "id" : "59",
+        "vertices" : [ {
+          "x" : 3899,
+          "y" : 3719
+        } ]
+      }, {
+        "id" : "60"
+      }, {
+        "id" : "61",
+        "vertices" : [ {
+          "x" : 1649,
+          "y" : 994
+        }, {
+          "x" : 2620,
+          "y" : 465
+        }, {
+          "x" : 3378,
+          "y" : 465
+        }, {
+          "x" : 4453,
+          "y" : 994
+        } ]
+      }, {
+        "id" : "62",
+        "vertices" : [ {
+          "x" : 1349,
+          "y" : 5511
+        }, {
+          "x" : 2620,
+          "y" : 1074
+        }, {
+          "x" : 3378,
+          "y" : 1074
+        } ]
+      }, {
+        "id" : "63",
+        "vertices" : [ {
+          "x" : 1349,
+          "y" : 7082
+        }, {
+          "x" : 1649,
+          "y" : 8511
+        }, {
+          "x" : 2620,
+          "y" : 9349
+        }, {
+          "x" : 3378,
+          "y" : 9349
+        }, {
+          "x" : 4453,
+          "y" : 8740
+        } ]
+      }, {
+        "id" : "64",
+        "vertices" : [ {
+          "x" : 3899,
+          "y" : 2594
+        } ]
+      }, {
+        "id" : "65",
+        "vertices" : [ {
+          "x" : 3899,
+          "y" : 2194
+        } ]
+      }, {
+        "id" : "66",
+        "vertices" : [ {
+          "x" : 3899,
+          "y" : 4403
+        }, {
+          "x" : 4453,
+          "y" : 3794
+        } ]
+      }, {
+        "id" : "67",
+        "vertices" : [ {
+          "x" : 4453,
+          "y" : 5536
+        } ]
+      }, {
+        "id" : "68",
+        "vertices" : [ {
+          "x" : 3599,
+          "y" : 7019
+        }, {
+          "x" : 3899,
+          "y" : 5611
+        }, {
+          "x" : 4453,
+          "y" : 5003
+        } ]
+      }, {
+        "id" : "69",
+        "vertices" : [ {
+          "x" : 1649,
+          "y" : 694
+        }, {
+          "x" : 2620,
+          "y" : 165
+        }, {
+          "x" : 3378,
+          "y" : 165
+        }, {
+          "x" : 4453,
+          "y" : 694
+        } ]
+      } ],
+      "softwareSystemId" : "10",
+      "title" : "RecruitX Platform – Container View (Python + Go Hybrid)"
+    } ],
     "systemContextViews" : [ {
       "dimensions" : {
         "height" : 2100,
@@ -287,7 +954,7 @@
         "x" : 2400,
         "y" : 865
       }, {
-        "id" : "16",
+        "id" : "27",
         "x" : 1460,
         "y" : 870
       } ],
@@ -296,45 +963,45 @@
       "key" : "SystemContext-001",
       "order" : 1,
       "relationships" : [ {
-        "id" : "11",
+        "id" : "22",
         "vertices" : [ {
           "x" : 2475,
           "y" : 690
         } ]
       }, {
-        "id" : "12",
+        "id" : "23",
         "vertices" : [ {
           "x" : 2775,
           "y" : 690
         } ]
       }, {
-        "id" : "13"
+        "id" : "24"
       }, {
-        "id" : "14",
+        "id" : "25",
         "vertices" : [ {
           "x" : 2321,
           "y" : 578
         } ]
       }, {
-        "id" : "15",
+        "id" : "26",
         "vertices" : [ {
           "x" : 2133,
           "y" : 811
         } ]
       }, {
-        "id" : "17"
+        "id" : "28"
       }, {
-        "id" : "18"
+        "id" : "29"
       }, {
-        "id" : "19"
+        "id" : "30"
       }, {
-        "id" : "20"
+        "id" : "31"
       }, {
-        "id" : "21"
+        "id" : "32"
       }, {
-        "id" : "22"
+        "id" : "33"
       }, {
-        "id" : "23"
+        "id" : "34"
       } ],
       "softwareSystemId" : "10",
       "title" : "RecruitX - System Context"
