@@ -1,76 +1,74 @@
-## Microservices Overview
+# 🧩 Microservices Overview (Event-Driven Architecture)
 
-### 1. Interviewer Information Service
-
-> Role: Read Interviewer Profile
-
-**Purpose:**
-Fetch interviewer profile data.
-
-**Features:**
-
-- Returns interviewer skills, seniority, location, timezone
-- Acts as a layer over internal directory (MyMindComputeProfile)
-- Supports caching and data enrichment
-
-**3rd-Party Integrations:**
-
-- MyMindComputeProfile (can be swapped with LinkedIn, internal DB)
-
-### 2. Candidate Information Service
-
-> Role: Read Candidate Insights
+## 1. **Interviewer Profile Service**
+> 📘 Role: Manage and serve interviewer metadata
 
 **Purpose:**
-Fetch candidate skillsets, preferences and other metadata.
+Acts as a gateway over internal directories like MyMindComputeProfile to provide enriched interviewer profiles.
 
 **Features:**
+- Exposes API to fetch interviewer skills, grade, timezone, and location
+- Performs periodic sync from MyMindComputeProfile / external sources
+- Caches enriched profile data with expiry
+- Publishes `interviewer_profile.updated` events
 
-- Standardizes structure for downstream logic
+**Integrations:**
+- MyMindComputeProfile (can be replaced with LinkedIn, LDAP, internal DB)
 
-**3rd-Party Integrations:**
+---
 
-- InterviewLogger (or other ATS)
-
-### 3. Interviewer Preference Service
-
-> Role: Interviewer's Interview Preference Management
+## 2. **Candidate Insights Service**
+> 📘 Role: Serve enriched candidate profiles
 
 **Purpose:**
-Retrieve interviewer’s preferred interview times, round information, etc.
+Fetches and standardizes candidate metadata from ATS platforms.
 
 **Features:**
+- Exposes API to fetch candidate skillset, experience, and preferences
+- Syncs with InterviewLogger (or other ATS)
+- Caches transformed candidate data
+- Publishes `candidate_profile.updated` events
 
-- Saves and retrieves interviewers' preferred timeslots
-- Saves and retrieves interviewers' interview round preference
-- Allow keeping track of blocklist and savelist to check against google calendar availability.
-    - Example: Always skip meeting that contains `Focus Time` or `ClientX`
-    - Example: Always allow meeting that contains `Blocked for interview slot` or `interview slot`
+**Integrations:**
+- InterviewLogger or other ATS platforms
+
+---
+
+## 3. **Interviewer Preferences Service**
+> 📗 Role: Persist and serve availability and interview-related preferences
+
+**Purpose:**
+Central source of truth for interviewer availability preferences and behavioral filters.
+
+**Features:**
+- Stores preferred slots, round types, blocklist/savelist logic
 - Supports recurring preferences
+- Evaluates calendar titles like `Focus Time` or `Interview Slot`
+- Caches processed preference data
+- Publishes `interviewer_preferences.updated` events
 
-**3rd-Party Integrations:**
+**Integrations:**
+- MindComputeScheduler [Assumption]
+- Calendar (for title parsing)
 
-- MindComputeScheduler (if possible)
+---
 
-### 4. Interview Configuration Service
-
-> Interview Configuration Control
+## 4. **Scheduling Config Service**
+> ⚙️ Role: Central configuration manager for scoring and selection logic
 
 **Purpose:**
-Manage dimension metadata (enable/disable, weight, function mappings) for slot and interviewer selection.
+Manages dynamic dimension weightings, function mappings, and runtime overrides.
 
 **Features:**
+- Stores matcher configuration (e.g., skill match, timezone match)
+- Runtime override support via API/UI
+- Cache-backed metadata config
+- Publishes `matcher_config.updated` events
 
-- Central config management
-    - Easily extensible — add new dimensions without code changes
-- Dynamically configurable via API/UI
-- Runtime override support for specific requests
-
-**3rd-Party Integrations:**
-
+**Integrations:**
 - Internal only (PostgreSQL, Redis)
 
-#### Config Store Design — Metadata-Driven Dimensions
+### Config Store Design — Metadata-Driven Dimensions
 
 **Data Source Sample Entries:**
 
@@ -91,127 +89,121 @@ Manage dimension metadata (enable/disable, weight, function mappings) for slot a
 | timezone_match    | true    | true       | 80     | []{interviewer_timezone, candidate_timezone} | check_timezone      |
 | grade_level       | true    | true       | 70     | []{interviewer_grade, candidate_experience}  | match_grade         |
 
-### 5. Interviewer Availability Service
+---
 
-> Role: Validate Slot Availability
-
-**Purpose:**
-Check if an interviewer is available at a given datetime and range.
-
-**Features:**
-
-- Caches availability (e.g., 4h expiry)
-- Handles conflicting meetings or time off
-- Marks unavailability of interviewer on cancellation | Needed for rescheduling
-
-**Integrations:**
-
-- Interviewer Preference Service
-
-**3rd-Party Integrations:**
-
-- Calendar
-- Leaver Planner
-
-### 6. Interviewer Selector
+## 5. **Availability Evaluator Service**
+> ⏰ Role: Evaluate real-time slot-level availability of interviewers
 
 **Purpose:**
-Main orchestrator to score and select interviewers.
+Validates whether an interviewer is available for a given time window.
 
 **Features:**
-
-- Allows to configure dimensions
-- Fetches candidate information from Candidate Information Service
-- Fetches interviewer information from Interviewer Information Service
-- Fetches configured dimensions from Interview Configuration Service
-- Dynamically applies processing functions per active dimension
-- Supports scoring and ranking logic
+- Cross-checks Calendar events
+- Filters out blocked terms via Preferences Service
+- Considers leave info (LeavePlanner)
+- Caches availability windows per interviewer
+- Publishes `availability.checked` and `availability.blocked` events
 
 **Integrations:**
+- Calendar, LeavePlanner
+- Interviewer Preferences Service
 
-- Interviewer Preference Service
-- Interviewer Availability Service
+---
 
-**3rd-Party Integrations:**
+## 6. **Matcher & Selector Service**
+> 🎯 Role: Score and select the best-fit interviewers
 
+**Purpose:**
+Applies scoring logic based on configured dimensions to rank interviewers.
+
+**Features:**
+- Fetches profile and availability data
+- Applies pluggable processing functions per dimension
+- Ranks and returns top N results
+- Publishes `interviewer.match.suggested` events
+
+**Integrations:**
+- Candidate Insights, Interviewer Profile, Preferences, Config, Availability Services
+
+---
+
+## 7. **Slot Recommender Service**
+> 🗓️ Role: Suggest optimal slots for interviews
+
+**Purpose:**
+Returns a list of potential interview slots that work across participants.
+
+**Features:**
+- Aggregates availability from Availability Evaluator
+- Filters by preferences and candidate constraints
+- Applies dimension-based slot ranking
+- Publishes `slot.recommendation.generated` events
+
+**Integrations:**
+- Matcher & Selector Service
+- Interviewer Preferences & Availability
+- Candidate Insights
+
+---
+
+## 8. **Chat Interface Service**
+> 💬 Role: Chatbot for recruiter interaction
+
+**Purpose:**
+Acts as the conversational interface to query availability, book interviews, etc.
+
+**Features:**
+- Natural language parsing via LLM/NLP
+- Queries Matcher, Recommender, and Tracker services
+- Supports fallback flows (e.g., no match found)
+- Publishes `chat.query.asked` and `chat.action.triggered` events
+
+**Integrations:**
+- Messenger
 - Internal services only
 
-### 7. Interview Slot Suggester
+---
 
-> Role: Provides list of available slots for candidate interview
+## 9. **Dashboard & Insights Service**
+> 📊 Role: UI layer for recruiters
 
 **Purpose:**
-Provides list of slots based of configurable dimension.
+Provides real-time view of interviews, availability, progress, and triggers.
 
 **Features:**
-
-- Allows to configure dimensions
-- Fetches candidate information from Candidate Information Service
-- Fetches interviewer information from Interviewer Information Service
+- Initiate new interviews
+- Filtered views of availability and interview load
+- Dashboard widgets powered by event logs
+- Publishes `ui.action.triggered` events
 
 **Integrations:**
+- All backend services via APIs or event streams
 
-- Interview Configuration Service
-- Interviewer Selector
+---
 
-### 8. NameMe Service
-
-**Purpose:**
-Provides chatbot and UI interface for recruiters and interviewers
-
-**Features:**
-
-- Enquires interviewer for a set if criteria
-- Check status of interviews
-- Other reporting information
-
-### 9. Orchestrator
+## 10. **Observability & Reporting Service**
+> 📈 Role: Analytics, history, and reporting engine
 
 **Purpose:**
-???
+Maintains denormalized historical views for analytics and reporting.
 
 **Features:**
-???
+- Ingests events from all services via streams
+- Runs ETL jobs for aggregations (interview load, completion rate, feedback delays)
+- Exposes dashboard reports via API/UI
+- Publishes `report.generated` events (for Messenger or Email delivery)
 
-### 10. Reporting Service
+**Integrations:**
+- Kafka/Event Bus (for ingest)
+- All services (read-only)
 
-**Purpose:**
-???
+---
 
-**Features:**
+## ✅ System-Level Properties
 
-1. Runs ETL jobs and keeps old of completed actions in the system for faster querying purposes
+- Every service:
+  - Owns its **data and cache** (bounded context)
+  - **Subscribes to relevant events** from event bus (e.g., Kafka, Pub/Sub)
+  - Exposes **REST/GraphQL APIs** for direct calls where needed
+  - Emits **audit and domain events** to central topic
 
-## 📝 Summary of Architectural Decisions
-
-| Decision Area            | Chosen Approach                                             | Reasoning                                                                                           |
-|--------------------------|-------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|
-| Architecture Style       | Event-Driven Microservices                                  | Scales well, allows independent services for each dimension, supports real-time + batch processing. |
-| Config Management        | Database-driven + API-based Config Service                  | Supports dynamic enabling/disabling of dimensions, weight adjustments, and per-request overrides.   |
-| 3rd Party API Wrappers   | Microservices for each external integration                 | Prevents direct dependency on external APIs, making it easier to switch providers.                  |
-| Data Processing          | Metadata-driven approach                                    | Allows adding new dimensions dynamically without modifying the core system.                         |
-| Request Format           | Flexible JSON payload                                       | Enables passing new dimensions without changing API contracts.                                      |
-| Selection Flow           | Decision Engine that dynamically applies enabled dimensions | Ensures only relevant filters are applied per request.                                              |
-| Storage                  | PostgreSQL (for persistence) + Redis (for fast access)      | Balances long-term storage with performance optimization.                                           |
-| Tech Stack               | Go (Fiber) + Flutter + PostgreSQL + Kafka + Redis           | Optimized for speed, scalability, and maintainability.                                              |
-| Caching Strategy         | 4-hour expiry on frequently changing data                   | Reduces API calls while keeping data reasonably fresh.                                              |
-| Manual Refresh Mechanism | Chatbot + UI interaction                                    | Allows manual intervention when needed.                                                             |
-
-> Need to think of Authentication, Authorisation via RBAC, Tech Stack and Deployment strategies
-
-## 📝 Flow of information
-
-1. Recruiter adds candidate interview to interviewLogger and informs RecruitX (our system) via UI or chatbot to schedule
-   interview.
-2. The system (`Orchestrator`) checks with `Interview Slot Suggester` for a list of slots available and then coordinates
-   with `MindComputeScheduler` and send an interview link to the candidate.
-3. The candidate can choose from the list of available slots or ask for reschedule.
-4. [If Reschedule] The system (`Orchestrator`) should generate a different set of slots and then send another link to
-   candidate.
-5. [If Slot Selected] The system(`Orchestrator`) should then talk with `Interviewer Selector` to select a interviewer
-   available for the candidate.
-6. The system(`Orchestrator`) should then send a google calender invite and necessary notification (chats, whatsapps).
-   `Q: Do we need another service here?`
-7. [If interviewer rejects] The system should initiate the interviewer selection step (Step 5 and Step 6)
-8. [If no matching interviewer] The system should inform recruiter
-9. [If candidate rejects] The system should inform recruiter

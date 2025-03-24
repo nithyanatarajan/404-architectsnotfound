@@ -1,6 +1,6 @@
-## 📘 Glossary
+# 📘 Glossary
 
-### User Roles in Interviewer Selector System
+## User Roles in Interviewer Selector System
 
 | User Role              | Description                                                           | Primary Interactions                                     | Permissions/Access                                                                |
 |------------------------|-----------------------------------------------------------------------|----------------------------------------------------------|-----------------------------------------------------------------------------------|
@@ -15,7 +15,7 @@
 - Roles may overlap in some cases (e.g., recruiter may act as admin).
 - Access to services is governed by role-based authorization (if implemented).
 
-### Integrated External Systems
+## Integrated External Systems
 
 | System Name   | Type                            | Purpose                                                            | Example Data Provided                                     | Role in Interviewer Selector               |
 |---------------|---------------------------------|--------------------------------------------------------------------|-----------------------------------------------------------|--------------------------------------------|
