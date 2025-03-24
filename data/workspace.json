@@ -1,0 +1,324 @@
+{
+  "configuration" : { },
+  "description" : "Description",
+  "documentation" : { },
+  "id" : 1,
+  "lastModifiedAgent" : "structurizr-ui",
+  "lastModifiedDate" : "2025-03-24T18:21:33Z",
+  "model" : {
+    "people" : [ {
+      "description" : "Schedules interviews and interacts with the chatbot.",
+      "id" : "1",
+      "location" : "Unspecified",
+      "name" : "Recruiter",
+      "properties" : {
+        "structurizr.dsl.identifier" : "user"
+      },
+      "relationships" : [ {
+        "description" : "Initiates scheduling via InterviewLogger",
+        "destinationId" : "10",
+        "id" : "11",
+        "sourceId" : "1",
+        "tags" : "Relationship,InternalFlow"
+      } ],
+      "tags" : "Element,Person"
+    }, {
+      "description" : "Selects interview slot from scheduling link.",
+      "id" : "2",
+      "location" : "Unspecified",
+      "name" : "Candidate",
+      "properties" : {
+        "structurizr.dsl.identifier" : "candidate"
+      },
+      "tags" : "Element,Person"
+    }, {
+      "description" : "Conducts interviews, interacts with the chatbot and receives notifications.",
+      "id" : "3",
+      "location" : "Unspecified",
+      "name" : "Interviewer",
+      "properties" : {
+        "structurizr.dsl.identifier" : "interviewer"
+      },
+      "tags" : "Element,Person"
+    } ],
+    "softwareSystems" : [ {
+      "description" : "ATS used for tracking candidates and interview feedback.",
+      "documentation" : { },
+      "id" : "4",
+      "location" : "Unspecified",
+      "name" : "InterviewLogger",
+      "properties" : {
+        "structurizr.dsl.identifier" : "interviewLogger"
+      },
+      "tags" : "Element,Software System,ExternalSystem"
+    }, {
+      "description" : "Tool to generate scheduling links and manage interviewer preferences.",
+      "documentation" : { },
+      "id" : "5",
+      "location" : "Unspecified",
+      "name" : "MindComputeScheduler",
+      "properties" : {
+        "structurizr.dsl.identifier" : "mindComputeScheduler"
+      },
+      "tags" : "Element,Software System,ExternalSystem"
+    }, {
+      "description" : "Stores interviewer skills and preferences.",
+      "documentation" : { },
+      "id" : "6",
+      "location" : "Unspecified",
+      "name" : "MyMindComputeProfile",
+      "properties" : {
+        "structurizr.dsl.identifier" : "myMindComputeProfile"
+      },
+      "tags" : "Element,Software System,ExternalSystem"
+    }, {
+      "description" : "Stores interviewer leave data.",
+      "documentation" : { },
+      "id" : "7",
+      "location" : "Unspecified",
+      "name" : "LeavePlanner",
+      "properties" : {
+        "structurizr.dsl.identifier" : "leaveplanner"
+      },
+      "tags" : "Element,Software System,ExternalSystem"
+    }, {
+      "description" : "Used for chatbot interaction and notifications.",
+      "documentation" : { },
+      "id" : "8",
+      "location" : "Unspecified",
+      "name" : "Messenger",
+      "properties" : {
+        "structurizr.dsl.identifier" : "messenger"
+      },
+      "tags" : "Element,Software System,ExternalSystem"
+    }, {
+      "description" : "Used for verifying interviewer availability.",
+      "documentation" : { },
+      "id" : "9",
+      "location" : "Unspecified",
+      "name" : "Calendar",
+      "properties" : {
+        "structurizr.dsl.identifier" : "calendar"
+      },
+      "tags" : "Element,Software System,ExternalSystem"
+    }, {
+      "description" : "Recruitment app to match, schedule, notify, and track interviews.",
+      "documentation" : { },
+      "id" : "10",
+      "location" : "Unspecified",
+      "name" : "RecruitX",
+      "properties" : {
+        "structurizr.dsl.identifier" : "system"
+      },
+      "relationships" : [ {
+        "description" : "Shows dashboard and reports",
+        "destinationId" : "1",
+        "id" : "12",
+        "sourceId" : "10",
+        "tags" : "Relationship,InternalFlow"
+      }, {
+        "description" : "Sends scheduling links",
+        "destinationId" : "2",
+        "id" : "13",
+        "sourceId" : "10",
+        "tags" : "Relationship,ExternalFlow"
+      }, {
+        "description" : "Sends calendar invites and notifications",
+        "destinationId" : "3",
+        "id" : "14",
+        "sourceId" : "10",
+        "tags" : "Relationship,InternalFlow"
+      }, {
+        "description" : "Fetches candidate status & updates interview feedback",
+        "destinationId" : "4",
+        "id" : "15",
+        "sourceId" : "10",
+        "tags" : "Relationship,ExternalFlow"
+      }, {
+        "description" : "Retrieves interview preferences and available slots",
+        "destinationId" : "5",
+        "id" : "16",
+        "sourceId" : "10",
+        "tags" : "Relationship,ExternalFlow"
+      }, {
+        "description" : "Fetches interviewer skills",
+        "destinationId" : "6",
+        "id" : "17",
+        "sourceId" : "10",
+        "tags" : "Relationship,ExternalFlow"
+      }, {
+        "description" : "Checks leave conflicts",
+        "destinationId" : "7",
+        "id" : "18",
+        "sourceId" : "10",
+        "tags" : "Relationship,ExternalFlow"
+      }, {
+        "description" : "Sends notifications and chatbot replies",
+        "destinationId" : "8",
+        "id" : "19",
+        "sourceId" : "10",
+        "tags" : "Relationship,ExternalFlow"
+      }, {
+        "description" : "Verifies interviewer availability",
+        "destinationId" : "9",
+        "id" : "20",
+        "sourceId" : "10",
+        "tags" : "Relationship,ExternalFlow"
+      } ],
+      "tags" : "Element,Software System,CoreSystem"
+    } ]
+  },
+  "name" : "Name",
+  "properties" : {
+    "structurizr.dsl" : "d29ya3NwYWNlIHsKCiAgICBtb2RlbCB7CiAgICAgICAgdXNlciA9IHBlcnNvbiAiUmVjcnVpdGVyIiB7CiAgICAgICAgICAgIGRlc2NyaXB0aW9uICJTY2hlZHVsZXMgaW50ZXJ2aWV3cyBhbmQgaW50ZXJhY3RzIHdpdGggdGhlIGNoYXRib3QuIgogICAgICAgICAgICB0YWdzICJQZXJzb24iCiAgICAgICAgfQoKICAgICAgICBjYW5kaWRhdGUgPSBwZXJzb24gIkNhbmRpZGF0ZSIgewogICAgICAgICAgICBkZXNjcmlwdGlvbiAiU2VsZWN0cyBpbnRlcnZpZXcgc2xvdCBmcm9tIHNjaGVkdWxpbmcgbGluay4iCiAgICAgICAgICAgIHRhZ3MgIlBlcnNvbiIKICAgICAgICB9CgogICAgICAgIGludGVydmlld2VyID0gcGVyc29uICJJbnRlcnZpZXdlciIgewogICAgICAgICAgICBkZXNjcmlwdGlvbiAiQ29uZHVjdHMgaW50ZXJ2aWV3cywgaW50ZXJhY3RzIHdpdGggdGhlIGNoYXRib3QgYW5kIHJlY2VpdmVzIG5vdGlmaWNhdGlvbnMuIgogICAgICAgICAgICB0YWdzICJQZXJzb24iCiAgICAgICAgfQoKICAgICAgICBncmVlbmhvdXNlID0gc29mdHdhcmVTeXN0ZW0gIkdyZWVuaG91c2UiIHsKICAgICAgICAgICAgZGVzY3JpcHRpb24gIkFUUyB1c2VkIGZvciB0cmFja2luZyBjYW5kaWRhdGVzIGFuZCBpbnRlcnZpZXcgZmVlZGJhY2suIgogICAgICAgICAgICB0YWdzICJFeHRlcm5hbFN5c3RlbSIKICAgICAgICB9CgogICAgICAgIGdvb2R0aW1lID0gc29mdHdhcmVTeXN0ZW0gIkdvb2RUaW1lIiB7CiAgICAgICAgICAgIGRlc2NyaXB0aW9uICJUb29sIHRvIGdlbmVyYXRlIHNjaGVkdWxpbmcgbGlua3MgYW5kIG1hbmFnZSBpbnRlcnZpZXdlciBwcmVmZXJlbmNlcy4iCiAgICAgICAgICAgIHRhZ3MgIkV4dGVybmFsU3lzdGVtIgogICAgICAgIH0KCiAgICAgICAgamlnc2F3ID0gc29mdHdhcmVTeXN0ZW0gIkppZ3NhdyIgewogICAgICAgICAgICBkZXNjcmlwdGlvbiAiU3RvcmVzIGludGVydmlld2VyIHNraWxscyBhbmQgcHJlZmVyZW5jZXMuIgogICAgICAgICAgICB0YWdzICJFeHRlcm5hbFN5c3RlbSIKICAgICAgICB9CgogICAgICAgIGxlYXZlUGxhbm5lciA9IHNvZnR3YXJlU3lzdGVtICJMZWF2ZSBQbGFubmVyIiB7CiAgICAgICAgICAgIGRlc2NyaXB0aW9uICJTdG9yZXMgaW50ZXJ2aWV3ZXIgbGVhdmUgZGF0YS4iCiAgICAgICAgICAgIHRhZ3MgIkV4dGVybmFsU3lzdGVtIgogICAgICAgIH0KCiAgICAgICAgZ2NoYXQgPSBzb2Z0d2FyZVN5c3RlbSAiR29vZ2xlIENoYXQiIHsKICAgICAgICAgICAgZGVzY3JpcHRpb24gIlVzZWQgZm9yIGNoYXRib3QgaW50ZXJhY3Rpb24gYW5kIG5vdGlmaWNhdGlvbnMuIgogICAgICAgICAgICB0YWdzICJFeHRlcm5hbFN5c3RlbSIKICAgICAgICB9CgogICAgICAgIGdjYWwgPSBzb2Z0d2FyZVN5c3RlbSAiR29vZ2xlIENhbGVuZGVyIiB7CiAgICAgICAgICAgIGRlc2NyaXB0aW9uICJVc2VkIGZvciB2ZXJpZnlpbmcgaW50ZXJ2aWV3ZXIgYXZhaWxhYmlsaXR5LiIKICAgICAgICAgICAgdGFncyAiRXh0ZXJuYWxTeXN0ZW0iCiAgICAgICAgfQoKICAgICAgICBzeXN0ZW0gPSBzb2Z0d2FyZVN5c3RlbSAiUmVjcnVpdFgiIHsKICAgICAgICAgICAgZGVzY3JpcHRpb24gIlJlY3J1aXRtZW50IGFwcCB0byBtYXRjaCwgc2NoZWR1bGUsIG5vdGlmeSwgYW5kIHRyYWNrIGludGVydmlld3MuIgogICAgICAgICAgICB0YWdzICJDb3JlU3lzdGVtIgoKICAgICAgICAgICAgdXNlciAtPiB0aGlzICJJbml0aWF0ZXMgc2NoZWR1bGluZyB2aWEgR3JlZW5ob3VzZSIgewogICAgICAgICAgICAgICAgdGFncyAiSW50ZXJuYWxGbG93IgogICAgICAgICAgICB9CgogICAgICAgICAgICB0aGlzIC0+IHVzZXIgIlNob3dzIGRhc2hib2FyZCBhbmQgcmVwb3J0cyIgewogICAgICAgICAgICAgICAgdGFncyAiSW50ZXJuYWxGbG93IgogICAgICAgICAgICB9CgogICAgICAgICAgICB0aGlzIC0+IGNhbmRpZGF0ZSAiU2VuZHMgc2NoZWR1bGluZyBsaW5rcyIgewogICAgICAgICAgICAgICAgdGFncyAiRXh0ZXJuYWxGbG93IgogICAgICAgICAgICB9CgogICAgICAgICAgICB0aGlzIC0+IGludGVydmlld2VyICJTZW5kcyBjYWxlbmRhciBpbnZpdGVzIGFuZCBub3RpZmljYXRpb25zIiB7CiAgICAgICAgICAgICAgICB0YWdzICJJbnRlcm5hbEZsb3ciCiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIHRoaXMgLT4gZ3JlZW5ob3VzZSAiRmV0Y2hlcyBjYW5kaWRhdGUgc3RhdHVzICYgdXBkYXRlcyBpbnRlcnZpZXcgZmVlZGJhY2siIHsKICAgICAgICAgICAgICAgIHRhZ3MgIkV4dGVybmFsRmxvdyIKICAgICAgICAgICAgfQoKICAgICAgICAgICAgdGhpcyAtPiBnb29kdGltZSAiUmV0cmlldmVzIGludGVydmlldyBwcmVmZXJlbmNlcyBhbmQgYXZhaWxhYmxlIHNsb3RzIiB7CiAgICAgICAgICAgICAgICB0YWdzICJFeHRlcm5hbEZsb3ciCiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIHRoaXMgLT4gamlnc2F3ICJGZXRjaGVzIGludGVydmlld2VyIHNraWxscyIgewogICAgICAgICAgICAgICAgdGFncyAiRXh0ZXJuYWxGbG93IgogICAgICAgICAgICB9CgogICAgICAgICAgICB0aGlzIC0+IGxlYXZlUGxhbm5lciAiQ2hlY2tzIGxlYXZlIGNvbmZsaWN0cyIgewogICAgICAgICAgICAgICAgdGFncyAiRXh0ZXJuYWxGbG93IgogICAgICAgICAgICB9CgogICAgICAgICAgICB0aGlzIC0+IGdjaGF0ICJTZW5kcyBub3RpZmljYXRpb25zIGFuZCBjaGF0Ym90IHJlcGxpZXMiIHsKICAgICAgICAgICAgICAgIHRhZ3MgIkV4dGVybmFsRmxvdyIKICAgICAgICAgICAgfQoKICAgICAgICAgICAgdGhpcyAtPiBnY2FsICJWZXJpZmllcyBpbnRlcnZpZXdlciBhdmFpbGFiaWxpdHkiIHsKICAgICAgICAgICAgICAgIHRhZ3MgIkV4dGVybmFsRmxvdyIKICAgICAgICAgICAgfQogICAgICAgIH0KICAgIH0KCiAgICB2aWV3cyB7CiAgICAgICAgc3lzdGVtQ29udGV4dCBzeXN0ZW0gewogICAgICAgICAgICBpbmNsdWRlICoKICAgICAgICAgICAgYXV0b2xheW91dCB0YgogICAgICAgICAgICB0aXRsZSAiUmVjcnVpdFggLSBTeXN0ZW0gQ29udGV4dCIKICAgICAgICB9CgoKICAgICAgICBzdHlsZXMgewogICAgICAgICAgICBlbGVtZW50ICJQZXJzb24iIHsKICAgICAgICAgICAgICAgIHNoYXBlIHBlcnNvbgogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjMEQ0N0ExCiAgICAgICAgICAgICAgICBjb2xvciAjZmZmZmZmCiAgICAgICAgICAgICAgICBmb250U2l6ZSAxOAogICAgICAgICAgICB9CgogICAgICAgICAgICBlbGVtZW50ICJDb3JlU3lzdGVtIiB7CiAgICAgICAgICAgICAgICBzaGFwZSByb3VuZGVkYm94CiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kICMxNTY1QzAKICAgICAgICAgICAgICAgIGNvbG9yICNmZmZmZmYKICAgICAgICAgICAgICAgIGZvbnRTaXplIDE4CiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIGVsZW1lbnQgIkV4dGVybmFsU3lzdGVtIiB7CiAgICAgICAgICAgICAgICBzaGFwZSByb3VuZGVkYm94CiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kICNFMUJFRTcKICAgICAgICAgICAgICAgIGNvbG9yICMwMDAwMDAKICAgICAgICAgICAgICAgIGZvbnRTaXplIDE2CiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIHJlbGF0aW9uc2hpcCAiSW50ZXJuYWxGbG93IiB7CiAgICAgICAgICAgICAgICBjb2xvciAjMTk3NkQyCiAgICAgICAgICAgICAgICB0aGlja25lc3MgMwogICAgICAgICAgICAgICAgc3R5bGUgc29saWQKICAgICAgICAgICAgICAgIGZvbnRTaXplIDE0CiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIHJlbGF0aW9uc2hpcCAiRXh0ZXJuYWxGbG93IiB7CiAgICAgICAgICAgICAgICBjb2xvciAjOUMyN0IwCiAgICAgICAgICAgICAgICB0aGlja25lc3MgMgogICAgICAgICAgICAgICAgc3R5bGUgZGFzaGVkCiAgICAgICAgICAgICAgICBmb250U2l6ZSAxMwogICAgICAgICAgICB9CiAgICAgICAgfQogICAgfQp9"
+  },
+  "views" : {
+    "configuration" : {
+      "branding" : { },
+      "lastSavedView" : "SystemContext-001",
+      "metadataSymbols" : "SquareBrackets",
+      "styles" : {
+        "elements" : [ {
+          "background" : "#0d47a1",
+          "color" : "#ffffff",
+          "fontSize" : 18,
+          "shape" : "Person",
+          "tag" : "Person"
+        }, {
+          "background" : "#1565c0",
+          "color" : "#ffffff",
+          "fontSize" : 18,
+          "shape" : "RoundedBox",
+          "tag" : "CoreSystem"
+        }, {
+          "background" : "#e1bee7",
+          "color" : "#000000",
+          "fontSize" : 16,
+          "shape" : "RoundedBox",
+          "tag" : "ExternalSystem"
+        } ],
+        "relationships" : [ {
+          "color" : "#1976d2",
+          "fontSize" : 14,
+          "style" : "Solid",
+          "tag" : "InternalFlow",
+          "thickness" : 3
+        }, {
+          "color" : "#9c27b0",
+          "fontSize" : 13,
+          "style" : "Dashed",
+          "tag" : "ExternalFlow",
+          "thickness" : 2
+        } ]
+      },
+      "terminology" : { }
+    },
+    "systemContextViews" : [ {
+      "automaticLayout" : {
+        "applied" : true,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "TopBottom",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "dimensions" : {
+        "height" : 2100,
+        "width" : 6000
+      },
+      "elements" : [ {
+        "id" : "1",
+        "x" : 2750,
+        "y" : 165
+      }, {
+        "id" : "2",
+        "x" : 200,
+        "y" : 1465
+      }, {
+        "id" : "3",
+        "x" : 900,
+        "y" : 1465
+      }, {
+        "id" : "4",
+        "x" : 1600,
+        "y" : 1515
+      }, {
+        "id" : "5",
+        "x" : 2350,
+        "y" : 1515
+      }, {
+        "id" : "6",
+        "x" : 3100,
+        "y" : 1515
+      }, {
+        "id" : "7",
+        "x" : 3850,
+        "y" : 1515
+      }, {
+        "id" : "8",
+        "x" : 4600,
+        "y" : 1515
+      }, {
+        "id" : "9",
+        "x" : 5350,
+        "y" : 1515
+      }, {
+        "id" : "10",
+        "x" : 2725,
+        "y" : 865
+      } ],
+      "enterpriseBoundaryVisible" : true,
+      "generatedKey" : true,
+      "key" : "SystemContext-001",
+      "order" : 1,
+      "relationships" : [ {
+        "id" : "11",
+        "vertices" : [ {
+          "x" : 2800,
+          "y" : 690
+        } ]
+      }, {
+        "id" : "12",
+        "vertices" : [ {
+          "x" : 3100,
+          "y" : 690
+        } ]
+      }, {
+        "id" : "13",
+        "vertices" : [ {
+          "x" : 750,
+          "y" : 1465
+        } ]
+      }, {
+        "id" : "14",
+        "vertices" : [ {
+          "x" : 1450,
+          "y" : 1465
+        } ]
+      }, {
+        "id" : "15"
+      }, {
+        "id" : "16"
+      }, {
+        "id" : "17"
+      }, {
+        "id" : "18"
+      }, {
+        "id" : "19",
+        "vertices" : [ {
+          "x" : 4450,
+          "y" : 1465
+        } ]
+      }, {
+        "id" : "20",
+        "vertices" : [ {
+          "x" : 5200,
+          "y" : 1465
+        } ]
+      } ],
+      "softwareSystemId" : "10",
+      "title" : "RecruitX - System Context"
+    } ]
+  }
+}
