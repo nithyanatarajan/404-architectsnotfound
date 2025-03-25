@@ -37,7 +37,7 @@
 - Notifications are sent via Messenger and any other configured channels (e.g., email, Slack).
 - InterviewLogger is updated with the latest interview schedule and status.
 
-## 🤖 Recruiter + Chatbot – Quick Lookup (Enhanced)
+## 🤖 Recruiter + Chatbot – Quick Lookup
 
 - The recruiter sends a natural language query to the chatbot via Messenger:
   > "Who’s available for a Code Pairing Interview next Monday?"
