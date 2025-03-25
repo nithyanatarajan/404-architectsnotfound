@@ -54,90 +54,100 @@ workspace {
             chatbot = container "Chatbot Service" {
                 technology "Python + FastAPI + LangChain"
                 description "Conversational interface for recruiters to query interviewer availability, initiate scheduling, and get updates"
+                tags "InternalSystem"
             }
 
             dashboard = container "Dashboard Service" {
-                technology "Flutter + REST API"
+                technology "Flutter"
                 description "Web UI to view status, reports, initiate interviews"
+                tags "InternalSystem"
             }
 
             profileService = container "Interviewer Profile Service" {
                 technology "Python + FastAPI + Redis"
                 description "Fetches and serves interviewer metadata (skills, grade, timezone)"
+                tags "InternalSystem"
             }
 
             candidateService = container "Candidate Insights Service" {
                 technology "Python + FastAPI + Redis"
                 description "Fetches and serves candidate profiles and preferences"
+                tags "InternalSystem"
             }
 
             preferencesService = container "Interviewer Preferences Service" {
                 technology "Python + FastAPI + Redis"
                 description "Manages interviewer's availability preferences, block/savelist logic"
+                tags "InternalSystem"
+            }
+
+            configService = container "Scheduling Config Service" {
+                technology "Python + FastAPI + Redis"
+                description "Manages matcher dimension weights, processing logic, and runtime overrides"
+                tags "InternalSystem"
+            }
+
+            configStore = container "Config Storage" {
+                technology "PostgreSQL"
+                description "Stores dimension information along with weights"
+                tags "Cache"
             }
 
             availabilityService = container "Availability Evaluator Service" {
                 technology "Go + Fiber + Calendar API"
                 description "Evaluates slot-level availability using Calendar and LeavePlanner"
-            }
-
-            configService = container "Scheduling Config Service" {
-                technology "Python + FastAPI + PostgreSQL"
-                description "Manages matcher dimension weights, processing logic, and runtime overrides"
+                tags "InternalSystem"
             }
 
             matcher = container "Matcher & Selector Service" {
                 technology "Go + Fiber + Redis"
                 description "Scores and ranks best-fit interviewers for a candidate based on multiple dimensions"
+                tags "InternalSystem"
             }
 
             slotSuggester = container "Slot Recommender Service" {
                 technology "Go + Fiber"
                 description "Suggests optimal interview time slots based on preferences and availability"
+                tags "InternalSystem"
+            }
+
+            scheduler = container "Interview Scheduler Service" {
+                technology "Go + Fiber"
+                description "Schedules interview"
+                tags "InternalSystem"
             }
 
             reportingService = container "Reporting & Analytics Service" {
                 technology "Python + FastAPI + ETL + PostgreSQL + Grafana"
                 description "Runs ETL, generates analytics dashboards, metrics and history reports"
+                tags "InternalSystem"
             }
 
-            //            eventBus = container "Event Bus" {
-            //                technology "Go + Kafka / Google PubSub Client"
-            //                description "Microservice communication and domain event flow"
-            //            }
+            eventBus = container "Event Bus" {
+                technology "Kafka / PubSub"
+                description "Internal event streaming backbone used by microservices for pub/sub"
+                tags "InternalInfra"
+            }
 
             authGateway = container "Auth Gateway" {
-                technology "Go + OIDC + API Gateway"
-                description "Handles authentication (Okta SSO), routes and enforces RBAC"
-            }
-
-            recruiter -> this "Schedules interviews and views reports" {
-                tags "InternalFlow"
-            }
-            this -> recruiter "Sends updates, dashboards, reports" {
-                tags "InternalFlow"
-            }
-            candidate -> this "Selects slot via MindComputeScheduler (callback flow)" {
-                tags "ExternalFlow"
-            }
-            this -> interviewer "Sends calendar invites and notifications" {
-                tags "InternalFlow"
-            }
-            interviewer -> this "RSVPs via calendar or chat" {
-                tags "ExternalFlow"
+                technology "OIDC + Kong Gateway + OPA"
+                description "Handles authentication (Okta SSO), routes and enforces RBAC via External OPA"
+                tags "InternalSystem"
             }
         }
 
         // Internal infrastructure
-        eventBus = softwareSystem "Event Bus (Kafka / PubSub)" {
+        eventBusBroker = softwareSystem "Event Bus (Kafka / PubSub)" {
             description "Internal event broker for microservices"
             tags "InternalInfra"
-            recruitx -> this "Publishes and consumes events" {
-                tags "InternalFlow"
-            }
+        }
+        //------------------------C1------------------------//
+        // C1:Flows to internal systems
+        recruitx -> eventBusBroker "Publishes and Subscribes to events" {
+            tags "InternalFlow"
         }
 
-        // Flows to external systems
+        // C1:Flows to external systems
         recruitx -> interviewLogger "Fetches candidate status and updates interview" {
             tags "ExternalFlow"
         }
@@ -157,51 +167,83 @@ workspace {
             tags "ExternalFlow"
         }
 
+        // C1: User interaction
+        recruiter -> recruitx "Schedules interviews and views reports" {
+            tags "InternalFlow"
+        }
+        recruitx -> recruiter "Sends updates, dashboards, reports" {
+            tags "InternalFlow"
+        }
+        candidate -> recruitx "Selects slot via MindComputeScheduler (callback flow)" {
+            tags "ExternalFlow"
+        }
+        recruitx -> interviewer "Sends calendar invites and notifications" {
+            tags "InternalFlow"
+        }
+        interviewer -> recruitx "RSVPs via calendar or chat" {
+            tags "ExternalFlow"
+        }
+        //------------------------C1------------------------//
+
+
+        //------------------------C2------------------------//
 
         // External integrations
         profileService -> myMindComputeProfile "Fetches interviewer data"
+
         candidateService -> interviewLogger "Fetches candidate profile"
+
         preferencesService -> mindComputeScheduler "Fetches round/time preferences"
-        dashboard -> interviewLogger "Updates interview records"
-        reportingService -> messenger "Sends reports/alerts"
+
+        configService -> configStore "Read and updates config dimensions"
+
         availabilityService -> calendar "Reads calendar, sends invites"
         availabilityService -> leavePlanner "Reads leave data"
-        chatbot -> messenger "Receives chat queries"
 
-        // Internal interactions
+        // User journey
         recruiter -> chatbot "Asks for availability, initiates scheduling"
-        recruiter -> dashboard "Manages and tracks interviews"
-        dashboard -> matcher "Requests best interviewer matches"
-        dashboard -> slotSuggester "Fetches available slots"
+        recruiter -> dashboard "Asks for availability, initiates scheduling, manages and tracks interviews"
 
         chatbot -> matcher "Requests interviewer suggestions"
         chatbot -> slotSuggester "Fetches slot suggestions"
-        chatbot -> availabilityService "Confirms availability"
+        chatbot -> scheduler "Schedule interview"
+
+        dashboard -> matcher "Requests best interviewer matches"
+        dashboard -> slotSuggester "Fetches available slots"
+        dashboard -> scheduler "Schedule interview"
+
+        scheduler -> matcher "Gets top interviewer based on timeslot"
 
         matcher -> configService "Fetches matcher config"
         matcher -> profileService "Fetches interviewer profile"
         matcher -> candidateService "Fetches candidate profile"
-        matcher -> preferencesService "Fetches preferences"
         matcher -> availabilityService "Checks availability"
 
-        slotSuggester -> matcher "Gets top interviewers"
-        slotSuggester -> availabilityService "Fetches slots"
-        slotSuggester -> preferencesService "Applies preference filters"
-
         availabilityService -> preferencesService "Uses block/savelist"
-        availabilityService -> calendar "Uses Calendar API"
-        availabilityService -> leavePlanner "Checks leave status"
 
-        reportingService -> eventBus "Consumes system events"
-        chatbot -> eventBus "Publishes query/request events"
-        dashboard -> eventBus "Publishes user actions"
+        slotSuggester -> matcher "Gets top interviewers"
+
         matcher -> eventBus "Publishes match suggestions"
         slotSuggester -> eventBus "Publishes slot recommendations"
-        availabilityService -> eventBus "Publishes availability status"
-        preferencesService -> eventBus "Publishes preference changes"
-        profileService -> eventBus "Publishes profile updates"
+
+        eventBus -> dashboard "Subscribes to match suggestions"
+        eventBus -> dashboard "Subscribes to slot recommendations"
+
+        eventBus -> chatbot "Subscribes to match suggestions"
+        eventBus -> chatbot "Subscribes to slot recommendations"
+
         reportingService -> eventBus "Publishes reports generated"
-        //        authGateway -> allContainers "Enforces auth & routes"
+        eventBus -> reportingService "Consumes system events"
+        chatbot -> eventBus "Publishes query/request events"
+        dashboard -> eventBus "Publishes user actions"
+
+        eventBus -> messenger "Sends reports/alerts"
+
+        interviewer -> chatbot "Asks for interview details for self"
+
+        chatbot -> messenger "Receives chat queries"
+
+        dashboard -> interviewLogger "Updates interview records"
     }
 
     views {
@@ -212,7 +254,7 @@ workspace {
 
         container recruitx {
             include *
-            autolayout lr
+            autolayout tb
             title "RecruitX Platform – Container View (Python + Go Hybrid)"
         }
 
@@ -239,8 +281,22 @@ workspace {
             }
 
             element "InternalInfra" {
+                shape pipe
+                background #ECEFF1
+                color #000000
+                fontSize 30
+            }
+
+            element "Cache" {
+                shape pipe
+                background #87CEEB
+                color #000000
+                fontSize 30
+            }
+
+            element "InternalSystem" {
                 shape roundedbox
-                background #C0D9FF
+                background #1565C0
                 color #000000
                 fontSize 30
             }
