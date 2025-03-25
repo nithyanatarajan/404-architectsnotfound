@@ -1,4 +1,4 @@
-# 🧩 RecruitX Next
+# 🧩 RecruitX Next | Architectural Kata 2025
 
 > The comeback of a loved tool—redesigned, reimagined.
 
