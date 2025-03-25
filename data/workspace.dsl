@@ -221,28 +221,28 @@ workspace {
                 shape person
                 background #0D47A1
                 color #ffffff
-                fontSize 18
+                fontSize 30
             }
 
             element "CoreSystem" {
                 shape roundedbox
                 background #1565C0
                 color #ffffff
-                fontSize 18
+                fontSize 30
             }
 
             element "ExternalSystem" {
                 shape roundedbox
                 background #E1BEE7
                 color #000000
-                fontSize 16
+                fontSize 30
             }
 
             element "InternalInfra" {
                 shape roundedbox
                 background #C0D9FF
                 color #000000
-                fontSize 16
+                fontSize 30
             }
 
             element "Container" {
@@ -255,14 +255,14 @@ workspace {
                 color #1976D2
                 thickness 3
                 style solid
-                fontSize 14
+                fontSize 26
             }
 
             relationship "ExternalFlow" {
                 color #9C27B0
                 thickness 2
                 style dashed
-                fontSize 13
+                fontSize 26
             }
         }
     }
