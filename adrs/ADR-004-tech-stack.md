@@ -24,7 +24,7 @@ We will adopt a **polyglot stack** using both Python and Go, chosen per service 
 Other shared tools:
 
 - **Kafka / PubSub** for messaging
-- **PostgreSQL** for transactional data
+- **PostgreSQL** for configuration data
 - **Redis** for low-latency caching
 - **Prometheus + Grafana** for observability
 - **Jaeger + OpenTelemetry** for tracing

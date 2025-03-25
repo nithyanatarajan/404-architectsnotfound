@@ -3,7 +3,7 @@
 ## 🧍 Recruiter Journey – Initiate Interview Schedule
 
 - [Outside the system] Recruiter ensures candidate information is available in InterviewLogger.
-- Recruiter initiates interview scheduling in `RecruitX Next` via chatbot, web, or mobile interface for the selected
+- Recruiter initiates interview scheduling in `RecruitX Next` via chatbot, or web interface for the selected
   candidate.
 - The system fetches interviewer skills, preferences, and availability from MyMindComputeProfile, MindComputeScheduler[Assumption], and Leave
   Planner.
