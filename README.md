@@ -14,3 +14,9 @@ interviews, double bookings, rescheduling chaos, frustrated interviewers and can
 Our goal is to streamline and automate the **interviewer discovery**, **scheduling**, **rescheduling**, and
 **notification flow** with a smart, integrated system and chatbot interface—reducing manual effort and accelerating
 the hiring process.
+
+
+Please find the zoom recording about the explanation of our High level design here -> 
+Your recording for meeting 951-6969-2215 (Meeting from Hangouts Chat) is ready!
+https://thoughtworks.zoom.us/rec/share/ufO5CRt8eDqcsHBrBaX-5Vx_v7KGSagWUdRIdv_Jb9zLnkbAICMlLqXavJ5xPp0K.QGk6K786UQf0w6Z9
+Passcode: 1=ww!e16
