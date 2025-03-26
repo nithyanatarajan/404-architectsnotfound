@@ -136,16 +136,7 @@ workspace {
             }
         }
 
-        // Internal infrastructure
-        eventBusBroker = softwareSystem "Event Bus (Kafka / PubSub)" {
-            description "Internal event broker for microservices"
-            tags "InternalInfra"
-        }
         //------------------------C1------------------------//
-        // C1:Flows to internal systems
-        recruitx -> eventBusBroker "Publishes and Subscribes to events" {
-            tags "InternalFlow"
-        }
 
         // C1:Flows to external systems
         recruitx -> interviewLogger "Fetches candidate status and updates interview" {
