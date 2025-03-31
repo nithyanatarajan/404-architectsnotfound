@@ -26,3 +26,7 @@ design decisions, artifacts, and solution components in RecruitX.
 | Compliance & PII handling                  | `AssumptionsAndFAQ.md` (Section 7)                                           | All user data treated as PII; encrypted + audit-logged               |
 | Multi-tenancy support                      | `AssumptionsAndFAQ.md` (Section 3)                                           | Out of scope — single-tenant (MindCompute only)                         |
 | Cache-first read architecture              | `AssumptionsAndFAQ.md` (Section 2), `Characteristics.md`, `Tradeoffs.md`     | All reads via Redis cache; refresh jobs pull data                    |
+| MongoDB as sync-layer cache                | `TechStack.md`, `Microservices.md` (harvest-sync, slot-seeker)               | Durable storage of external data, supports eventual consistency      |
+| Messenger Notifier integration                 | `Diagrams.md`, `UserJourneys.md`, `Microservices.md`                         | Sends notifications to recruiters via Messenger via adapter        |
+| DLQ visibility via dashboard               | `Tradeoffs.md`, `Microservices.md`, `UserJourneys.md`                        | Visible to RBAC-authorized users; traceable/reschedulable            |
+| Compliance traceability                    | `TraceabilityMatrix.md`, `Security.md`, `Characteristics.md`                 | Enforced encryption, access audit trails, no raw API exposure        |
