@@ -31,7 +31,7 @@ scalable, cache-first interview scheduling system submitted for ArchKata 2025.
 ## ✨ Solution Highlights
 
 - 🔁 **Cache-as-Primary Reads**: Redis powers all live reads; external data sync is background-only
-- 💬 **Multichannel Interface**: Recruiters interact via Web UI, Slack, and Chatbot
+- 💬 **Multichannel Interface**: Recruiters interact via Web UI, and Chatbot
 - ⚡ **DLQ + Alerting Built-In**: Resilient retries and manual fallback for all critical paths
 - 🧠 **LLM-Enhanced**: NLP/LLM augment chatbot and reporting — provider-agnostic and pluggable
 - 🛡️ **Secure by Design**: OIDC + OPA + Vault + mTLS across mesh-enabled services
