@@ -43,6 +43,7 @@ the hiring process.
 | [`DeploymentStrategy.md`](./docs/DeploymentStrategy.md) | GitOps, Helm, and platform-agnostic setup      |
 | [`Microservices.md`](./docs/Microservices.md)           | Responsibilities and API/event interaction map |
 | [`ADRsList.md`](./docs/ADRsList.md)                     | List of ADRs                                   |
+| [`Diagrams.md`](./docs/Diagrams.md)                     | List of diagrams and flows                     |
 
 ---
 
