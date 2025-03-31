@@ -42,6 +42,7 @@ the hiring process.
 | [`AITools.md`](./docs/AITools.md)                       | AI/NLP tools like Agno and chatbot interpreter |
 | [`DeploymentStrategy.md`](./docs/DeploymentStrategy.md) | GitOps, Helm, and platform-agnostic setup      |
 | [`Microservices.md`](./docs/Microservices.md)           | Responsibilities and API/event interaction map |
+| [`ADRsList.md`](./docs/ADRsList.md)                     | List of ADRs                                   |
 
 ---
 

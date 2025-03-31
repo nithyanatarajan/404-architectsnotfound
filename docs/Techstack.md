@@ -7,29 +7,29 @@ evaluation criteria.
 
 ## 🏗️ Application Architecture
 
-| Component            | Tool / Tech        | Reason for Choice                                                              |
-|----------------------|--------------------|--------------------------------------------------------------------------------|
-| Microservice Runtime | **Go**, **Python** | Polyglot architecture: each service uses the language best suited for its task |
-| UI Framework         | **Flutter**        | Cross-platform, performant frontend for the recruiter dashboard                |
-| API Gateway          | **Kong**           | Plugin ecosystem, OIDC support, rate limiting, extensible authN control        |
-| AuthN & AuthZ        | **OIDC + OPA**     | Standard identity and policy enforcement mechanisms                            |
-| Pub/Sub Messaging    | **Kafka**          | Durable, scalable async messaging backbone                                     |
-| Service Mesh         | **Consul + Envoy** | Sidecar-based mTLS, traffic routing, discovery, observability integration      |
-| Service Discovery    | **Consul**         | Native K8s + multi-platform support                                            |
+| Component            | Tool / Tech                      | Reason for Choice                                                              |
+|----------------------|----------------------------------|--------------------------------------------------------------------------------|
+| Microservice Runtime | **Go** and **Python**            | Polyglot architecture: each service uses the language best suited for its task |
+| UI Framework         | **Flutter** with **FlutterFlow** | Cross-platform, performant frontend for the recruiter dashboard                |
+| API Gateway          | **Kong**                         | Plugin ecosystem, OIDC support, rate limiting, extensible authN control        |
+| AuthN & AuthZ        | **OIDC + OPA**                   | Standard identity and policy enforcement mechanisms                            |
+| Pub/Sub Messaging    | **Kafka**                        | Durable, scalable async messaging backbone                                     |
+| Service Mesh         | **Consul + Envoy**               | Sidecar-based mTLS, traffic routing, discovery, observability integration      |
+| Service Discovery    | **Consul**                       | Native K8s + multi-platform support                                            |
 
 ---
 
 ## 📦 Infrastructure & DevOps
 
-| Component         | Tool / Tech                      | Reason for Choice                                               |
-|-------------------|----------------------------------|-----------------------------------------------------------------|
-| Container Runtime | **Docker**                       | Ubiquitous, consistent builds                                   |
-| Orchestration     | **Kubernetes** (k3s for local)   | Industry standard, scalable, local-friendly with `k3s`          |
-| Deployment Mgmt   | **Helm**                         | Templated Kubernetes deployments                                |
-| IaC               | **Terraform**                    | Declarative, cloud-agnostic infra provisioning                  |
-| GitOps            | **ArgoCD**                       | Declarative delivery, drift detection, and pipeline integration |
-| CI Tools          | **GitHub Actions / GoCD / etc.** | Linting, testing, image scan before delivery                    |
-| Local Dev         | **k3s**                          | Lightweight Kubernetes setup for fast local development         |
+| Component         | Tool / Tech                    | Reason for Choice                                               |
+|-------------------|--------------------------------|-----------------------------------------------------------------|
+| Container Runtime | **Docker**                     | Ubiquitous, consistent builds                                   |
+| Orchestration     | **Kubernetes** (k3s for local) | Industry standard, scalable, local-friendly with `k3s`          |
+| Deployment Mgmt   | **Helm**                       | Templated Kubernetes deployments                                |
+| IaC               | **Terraform**                  | Declarative, cloud-agnostic infra provisioning                  |
+| GitOps            | **ArgoCD**                     | Declarative delivery, drift detection, and pipeline integration |
+| CI Tools          | **GitHub Actions / GitLab CI** | Linting, testing, image scan before delivery                    |
+| Local Dev         | **k3s**                        | Lightweight Kubernetes setup for fast local development         |
 
 ---
 

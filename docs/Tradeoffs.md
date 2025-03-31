@@ -76,7 +76,6 @@ This document outlines the key architectural tradeoffs made during the design of
     - Requires orchestration and baseline infra setup
 - 📌 Mitigation:
     - Terraform modules and Helm charts modularized
-    - GoCD pipelines orchestrate CI/CD
 
 ---
 
