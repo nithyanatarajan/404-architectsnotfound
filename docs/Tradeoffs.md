@@ -1,12 +1,14 @@
 # ⚖️ Architectural Tradeoffs – RecruitX Next
 
-This document outlines the key architectural tradeoffs made during the design of the RecruitX Next system. It aims to capture **why** certain decisions were made, and the **pros/cons** that were evaluated.
+This document outlines the key architectural tradeoffs made during the design of the RecruitX Next system. It aims to
+capture **why** certain decisions were made, and the **pros/cons** that were evaluated.
 
----
+_For full rationale and decision context, refer to [ADR-004](./ADR-004-quality-tradeoffs.md)._
 
 ## 🧱 Event-Driven vs Request-Driven Architecture
 
-**Decision**: Adopt an event-driven microservice architecture with selective use of REST APIs for synchronous operations.
+**Decision**: Adopt an event-driven microservice architecture with selective use of REST APIs for synchronous
+operations.
 
 - ✅ Pros:
     - Loosely coupled services
@@ -95,5 +97,7 @@ This document outlines the key architectural tradeoffs made during the design of
 ---
 
 ## 🔍 Final Observation
-All major decisions were made with resilience, clarity, and extensibility in mind. Where tradeoffs were needed, fallback paths, retries, or tooling were introduced to mitigate risks.
+
+All major decisions were made with resilience, clarity, and extensibility in mind. Where tradeoffs were needed, fallback
+paths, retries, or tooling were introduced to mitigate risks.
 

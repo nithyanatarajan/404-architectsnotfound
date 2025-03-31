@@ -4,13 +4,25 @@ This document outlines how the architecture addresses key quality attributes, re
 configurability goals, and runtime resilience.
 
 > 🔝 **Top 3 Driving Characteristics**
-> 1. **Configurability** – To dynamically adjust scheduling rules, weights, and flows without redeploying code
-> 2. **Interoperability** – To connect with third-party systems over APIs, events, and chat
-> 3. **Observability** – To provide real-time visibility, feedback, and debugging across async workflows
+> 1. **Resilience** – System should absorb failures without interrupting user flows
+> 2. **Configurability** – Rules and thresholds adjustable at runtime
+> 3. **Observability** – Deep visibility into async, cached, and fallback paths
 
 ---
 
 ## 🔝 Top 3 Characteristics
+
+## ✅ Resilience
+
+**Definition**: Recover from failure and maintain workflow continuity.
+
+- Kafka-based DLQs isolate failures and allow safe reprocessing
+- Retries with exponential backoff via `tenacity` (Python) and Go context patterns
+- Circuit breaker prevents repeated downstream hits
+- Fallback to cached data ensures degraded-but-consistent operation
+- Alerts sent to recruiters when failures affect freshness or slot computation
+
+---
 
 ## ✅ Configurability
 
@@ -22,16 +34,6 @@ configurability goals, and runtime resilience.
 
 ---
 
-## ✅ Interoperability
-
-**Definition**: Ensures systems can communicate consistently through open protocols and shared infrastructure.
-
-- Unified interaction via Kong Gateway
-- REST/gRPC standardization between internal services
-- Kafka for async flows across systems
-
----
-
 ## ✅ Observability
 
 **Definition**: See, trace, and debug what's happening in the system.
@@ -39,48 +41,20 @@ configurability goals, and runtime resilience.
 - OpenTelemetry + Jaeger for distributed traces
 - Logs via Loki; metrics via Prometheus; dashboards in Grafana
 - Kafka emits all major state transitions
+- AI and cache freshness info included in logs and alerts
 
 ---
 
 ## 🧩 Other Characteristics
 
-## ✅ Extensibility
-
-**Definition**: Plug in future functionality with minimal change.
-
-- Add support for new ATS or calendar APIs via Kong + adapters
-- UI layers (dashboard, chatbot) are loosely coupled and integration-ready
-
----
-
 ## ✅ Security
 
 **Definition**: Enforces protection and secure access to data, APIs, and communication across services.
 
-- Protect Personally Identifiable Information (PII)
-- Enforce OAuth2.0, SSO, and RBAC via OIDC + OPA
-- Use TLS and Vault for secure communication and secrets
-
----
-
-## ✅ Scalability
-
-**Definition**: System can increase throughput and responsiveness as load grows.
-
-- Vertical scaling preferred due to seasonal load
-- Redis-backed caching for high-performance slot lookup
-- K8s-native autoscaling with optional instance-based tuning
-
----
-
-## ✅ Resilience
-
-**Definition**: Recover from failure and maintain workflow continuity.
-
-- Retry with exponential backoff via `tenacity` (Python) and Go contexts
-- Circuit breaker pattern in core APIs
-- Dead-letter queues in Kafka to prevent message loss
-- Fallback to cached data on external API failure
+- All user data is classified as **PII**
+- OAuth2.0 + SSO with OIDC
+- RBAC enforced via OPA
+- mTLS and Vault for secure comms and secrets
 
 ---
 
@@ -88,9 +62,19 @@ configurability goals, and runtime resilience.
 
 **Definition**: Remain responsive despite failures or spikes.
 
-- Redis + fallback cache avoids blocking due to upstream outages
-- Kubernetes probes auto-recover failed pods
-- Graceful degradation paths if InterviewLogger, Calendar, etc. are down
+- Redis + fallback cache ensures read availability even during upstream downtime
+- All reads use cache; API hits are only made during background refresh
+- Kubernetes probes and horizontal autoscaling ensure HA behavior
+
+---
+
+## ✅ Scalability
+
+**Definition**: System can increase throughput and responsiveness as load grows.
+
+- Redis used for fast reads; refresh jobs for writes
+- Services are stateless and K8s-native with autoscaling
+- DLQs and circuit breakers prevent cascading failures
 
 ---
 
@@ -99,8 +83,29 @@ configurability goals, and runtime resilience.
 **Definition**: Easy to change, operate, and evolve.
 
 - GitOps (ArgoCD) with Helm ensures reproducible deployments
-- Monitored config changes and rollback support
-- Logical microservice boundaries make refactoring safe
+- Clear microservice boundaries with domain-aligned logic
+- Safe rollback and versioned config changes via Git
+
+---
+
+## ✅ Extensibility
+
+**Definition**: Plug in future functionality with minimal change.
+
+- Support for new ATS or calendar APIs via Kong + adapters
+- AI/LLM-based components (e.g., chatbot, reports) are loosely coupled and pluggable
+- Gemini is used where org-approved; Ollama is supported for local testing
+
+---
+
+## ✅ Interoperability
+
+**Definition**: Ensures systems can communicate consistently through open protocols and shared infrastructure.
+
+- Unified interaction via Kong Gateway
+- REST/gRPC standardization between internal services
+- Kafka for async flows across systems
+- Redis-backed cache reads + sync-based writes ensure separation of concern
 
 ---
 
@@ -108,23 +113,27 @@ configurability goals, and runtime resilience.
 
 **Definition**: Low latency and fast response times.
 
-- Redis + Mongo reduce live query times
-- Pre-synced slot data avoids API bottlenecks
-- Tracing and profiling enabled during runtime
+- Redis used for sub-second slot lookups
+- MongoDB used as pre-populated cache for larger query datasets
+- Avoids live queries to external APIs during runtime
 
 ---
 
 ## 🧩 Additional Characteristics
 
-### 🟡 Feasibility
+### 🟡 AI Augmentation
 
-- Kafka makes the event-driven approach viable without major dependencies
+- AI/LLM tools (e.g., Gemini, Ollama) used for summarization, anomaly alerts, and chatbot intent handling
+- Outputs are non-blocking and surfaced in UI/reporting
+- Tooling is provider-agnostic and modular
 
-### 🟡 Abstraction
+### 🟡 DLQ Visibility
 
-- Each service owns its domain and communicates via events or APIs
+- DLQs are exposed to authorized users via the dashboard
+- Manual or automated replay mechanisms can be triggered
+- Alerts are configurable and RBAC-scoped
 
 ---
 
-✅ *This profile reflects a resilient, secure, and evolvable cloud-native system focused on quality-of-service and safe
-extensibility.*
+✅ *This profile reflects a resilient, secure, AI-augmented cloud-native system optimized for async workflows and
+human-centric override capabilities.*

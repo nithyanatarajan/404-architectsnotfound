@@ -1,5 +1,13 @@
 # 🧩 Microservices – RecruitX Next
 
+> Legend
+
+```
+- 🔥 = Cache-only read layer (Redis-first)
+- ⚠️ = DLQ-enabled for async failure recovery
+- 🤖 = NLP/LLM enhanced
+```
+
 ## 1. `interviewLogger-wrapper`
 
 - **Responsibility:** Interface layer between InterviewLogger and internal services
@@ -16,92 +24,59 @@
     - Queries `slot-seeker` for available slots
     - Forwards selections to `interview-scheduler`
 
-## 3. `slot-seeker`
+## 3. `slot-seeker` 🔥
 
-- **Responsibility:** Matches slots based on candidate tech stack and round using Redis cache
-- **Consumes:**
-    - MongoDB via `harvest-sync` (used as cache only)
-    - API from `candidate-service`
-- **Exposes:**
-    - Slot availability for downstream services
-- ℹ️ Note: Data is considered temporal. Final slot conflict resolution is handled by the `interview-scheduler`.
+- **Responsibility:** Computes matching slots from available data
+- **Reads from:** Redis cache only; no direct external API or Mongo access
+- **Note:** Cache is refreshed by `harvest-sync` jobs
+- **Resilience:** Handles stale data gracefully; alerts triggered on cache sync failures
 
-## 4. `interview-scheduler`
+## 4. `interview-scheduler` ⚠️
 
-- **Responsibility:** Orchestrates interview setup, interviewer selection, persistence, retries, and rescheduling
-- **Consumes:**
-    - Slot + tech stack from `candidate-service`
-    - Config weights from `config-service`
-    - Calendar responses from `notifier-service`
-- **Stores:** MongoDB (used as durable cache)
-- **Exposes:**
-    - Event publishing to Kafka
-- ✅ Final selector of interviewer based on latest slot & config context
+- **Responsibility:** Finalizes slot assignment and generates interviewer invites
+- **Consumes:** Requests from `candidate-service` or `chatbot`
+- **Publishes:** Events to Kafka (e.g., `interview-scheduled`)
+- **Resilience:** DLQ configured for downstream failures (e.g., slot lock, invite issue)
 
-## 5. `notifier-service`
+## 5. `notifier-service` ⚠️
 
-- **Responsibility:** Generates and dispatches calendar invites, links, status alerts, and chat messages
-- **Consumes:**
-    - Queue events from `interview-scheduler`
-    - Webhook responses from Calendar
-- **Sends:**
-    - Emails to candidate
-    - Calendar invites to interviewers
-    - Messenger notifications to recruiters and interviewers (via Messenger API)
+- **Responsibility:** Sends notifications to interviewers/recruiters via Slack, email, or chatbot
+- **Consumes:** Kafka events like scheduling, rescheduling, declines
+- **Resilience:** DLQ-enabled; supports reprocessing on transient failures
 
-## 6. `dashboard`
+## 6. `feedback-collector`
 
-- **Responsibility:** Recruiter-facing UI to view interview progress and take manual actions
-- **Consumes:**
-    - Kafka events for interview status
-- **Supports:**
-    - Manual override of scheduler (via API)
-    - Manual action flow enabled
+- **Responsibility:** Handles post-interview feedback intake and tracking
+- **Consumes:** InterviewLogger APIs, internal Slack triggers
+- **Writes to:** Mongo (optional); triggers follow-up reminders via Kafka
 
-## 7. `chatbot` + `chatbot-interpreter`
+## 7. `chatbot` + `chatbot-interpreter` 🔥 🤖
 
-- **Responsibility:** Natural language interface for recruiters
-- **Consumes:**
-    - API → `slot-seeker`, `interview-scheduler`
-- **Handles:**
-    - Booking, rescheduling, cancellations, intent parsing
+- **Responsibility:** NLP-powered interface to help recruiters view slots, schedule interviews, and reschedule
+- **Reads from:** Redis cache only
+- **Intent Parsing:** Backed by custom NLP interpreter with pluggable LLM backend (e.g., Gemini, Ollama)
+- **Note:** All chatbot actions are read-only or trigger commands via events
 
-## 8. `harvest-sync`
+## 8. `dashboard-service`
 
-- **Responsibility:** Scheduled job to pull data from external systems and populate MongoDB
-- **Data Sources:** MindComputeScheduler, MyMindComputeProfile, Calendar, LeavePlanner
-- **Frequency:**
-    - Calendar: every 30 minutes
-    - MyMindComputeProfile/LeavePlanner: daily (configurable)
-- **Publishes:** Kafka messages for downstream consumers
+- **Responsibility:** Provides UI-backed reports and insights for recruiters
+- **Reads from:** Redis + MongoDB (via query API only)
+- **Features:** Region-based filters, interview throughput, feedback rates
 
-## 9. `config-service`
+## 9. `harvest-sync`
 
-- **Responsibility:** Stores configurable weights and rules for interviewer matching
-- **Stores:** MongoDB (acts as source of truth)
-- **Consumes:** API requests from `interview-scheduler`
+- **Responsibility:** Periodically fetches data from external systems (Calendar, MindComputeScheduler, MyMindComputeProfile)
+- **Writes to:** MongoDB (durable sync cache) + Redis (live read cache)
+- **Schedule:** Configurable intervals (e.g., 30 mins for calendar, daily for leave/planner)
+- **Resilience:** Failsafe alerting + DLQ for persistent sync issues
 
----
+## 10. `config-service`
 
-## Event-Driven Communication Summary
+- **Responsibility:** Stores tunable weights, round logic, rule configs
+- **Accessed by:** `slot-seeker`, `interview-scheduler`, `chatbot`, `dashboard`
+- **Reload Strategy:** Live-reload supported; restart-free tuning
 
-| Event                     | Publisher             | Consumers                       |
-|---------------------------|-----------------------|---------------------------------|
-| `AvailableSlotsGenerated` | `slot-seeker`         | `candidate-service`             |
-| `InterviewRequested`      | `candidate-service`   | `interview-scheduler`           |
-| `InterviewScheduled`      | `interview-scheduler` | `notifier-service`, `dashboard` |
-| `InterviewDeclined`       | `notifier-service`    | `interview-scheduler`           |
-| `InterviewRescheduled`    | `interview-scheduler` | `notifier-service`, `dashboard` |
-| `ManualActionRequired`    | `interview-scheduler` | `dashboard`                     |
+All services are stateless unless noted otherwise, and communicate via Kafka or internal APIs behind Kong Gateway. Cache
+layering is strictly followed: Redis is the live read path, Mongo is a durable sync cache updated by jobs like
+`harvest-sync`.
 
-## 🌐 External Systems
-
-| System          | Type         | Integrated Via         |
-|-----------------|--------------|------------------------|
-| Calendar | Calendar API | Webhook + Harvest Sync |
-| InterviewLogger      | ATS          | API + Webhook Adapter  |
-| MindComputeScheduler        | External     | Harvest Sync           |
-| LeavePlanner   | Internal     | Harvest Sync           |
-| MyMindComputeProfile          | Internal     | Harvest Sync           |
-| Messenger           | Messaging    | Notifier + Chatbot     |
-| Email           | Messaging    | Notifier Service       |

@@ -19,6 +19,12 @@ RecruitX supports three distinct initiation channels:
 All paths converge to:  
 Slot Seeker → Scheduler → Notifier → Calendar → Dashboard
 
+> ℹ️ All interview slot reads are served via Redis (cache-as-primary).  
+> External systems are queried only via periodic background syncs (e.g., `harvest-sync`), not during runtime.
+> DLQ and alerting support exists for sync/job failures.
+
+---
+
 ## 🧍 Recruiter Journey – Initiate Interview Schedule
 
 - [Outside the system] Recruiter ensures candidate information is available in InterviewLogger.
@@ -27,13 +33,17 @@ Slot Seeker → Scheduler → Notifier → Calendar → Dashboard
 
 Once initiated:
 
-- The system fetches interviewer skills, preferences, and availability from
+- The system fetches interviewer skills, preferences, and availability from:
     - **MyMindComputeProfile** – Skills, location, role
     - **MindComputeScheduler** [Assumption] – Preferences, coordination rules
     - **LeavePlanner** – PTO, holidays
     - **Calendar** – Real-time availability
+
+> 🔁 These are **not fetched live**; all external data is pre-fetched and refreshed periodically by the `harvest-sync`
+> job and stored in Mongo/Redis.
+
 - Based on fetched data and config rules:
-    - `Slot Seeker` generates valid time slots for the requested round
+    - `Slot Seeker` generates valid time slots for the requested round (via Redis reads)
     - `Interview Scheduler` applies scoring logic (configurable & weighted)
     - Candidate receives scheduling link (via email)
 
@@ -48,6 +58,7 @@ Once initiated:
         - Availability at the selected time
         - Configured weights (e.g., time zone, load)
     - The optimal interviewer is selected
+
 - Calendar invites are sent to both the interviewer and candidate.
 - The system registers a **push notification channel** for the event using the Calendar API.
 - The system receives **webhook callbacks** if either the candidate or interviewer:
@@ -60,10 +71,15 @@ Once initiated:
     - ❌ If candidate declines: system notifies recruiter for manual action.
     - 🕐 If no response within a configured timeout: system prompts rescheduling or alerts recruiter.
 
+> 🚨 Sync and webhook failures are retried with backoff. After 3 failures (configurable), alerts are raised and stale
+> data fallback is activated. Kafka DLQs isolate failed messages for replay.
+
 - Updates are:
     - Logged via Kafka events
     - Synced with InterviewLogger
-    - Delivered to recruiter via Messenger and any other configured channels (e.g., email, Slack).
+    - Delivered to recruiter via Messenger and any other configured channels (e.g., email, Slack)
+
+---
 
 ## 🤖 Recruiter + Chatbot – Quick Lookup
 
@@ -71,7 +87,8 @@ Once initiated:
   > "Who’s available for a Code Pairing Interview next Monday?"
 
 - The chatbot:
-    - Parses the intent using an NLP engine (e.g., LangChain + OpenAI).
+    - Parses the intent using an NLP engine (e.g., spaCy + Transformers), with optional LLMs like Gemini/Ollama for
+      enhanced interpretation
     - Extracts key entities:
         - **Interview Type**: Code Pairing
         - **Date**: Next Monday
@@ -81,6 +98,8 @@ Once initiated:
         - Preferred round (if defined)
         - Interview load/capacity (e.g., max interviews per week)
         - Leave data (from LeavePlanner)
+
+> 🔹 The chatbot performs **read-only queries via Redis cache**. It never calls external APIs during lookup.
 
 - The chatbot responds with:
     - A list of **Top 3 interviewers**, ranked by relevance.
@@ -96,6 +115,8 @@ Once initiated:
       > "Schedule with Arjun at 2 PM"
     - Request additional options:
       > "Anyone else available after 4 PM?"
+
+---
 
 ## 💻 Recruiter + Web – Dashboard & Reporting
 
@@ -119,7 +140,7 @@ Once initiated:
     - Interview round preferences
     - Interview load
     - Team or department
-- Hover actions show quick insights (e.g., upcoming interviews).
+- Hover actions show quick insights (e.g., upcoming interviews)
 
 ### 📊 Interview Progress Tracker
 
@@ -145,4 +166,4 @@ Once initiated:
 
 - "Flag Overload" — if interviewers are nearing their weekly cap
 - "Send Reminder" — for pending feedback
-- "Suggest Slot"— for interviews stuck in unconfirmed state
+- "Suggest Slot" — for interviews stuck in unconfirmed state
