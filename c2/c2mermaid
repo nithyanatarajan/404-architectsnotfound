@@ -1,0 +1,69 @@
+---
+config:
+  layout: fixed
+---
+flowchart TD
+ subgraph subGraph0["User Roles"]
+        dashboard["Dashboard UI (Flutter)"]
+        recruiter["Recruiter"]
+        notifier_service["Notifier Service (Microservice)"]
+        candidate["Candidate"]
+        google_calendar["Calendar (Calendar Management)"]
+        interviewer["Interviewer"]
+  end
+ subgraph Interfaces["Interfaces"]
+        chatbot["Chatbot Interface (Messenger Bot)"]
+        chatbot_interpreter["Chatbot Interpreter (LangChain + OpenAI)"]
+  end
+ subgraph Microservices["Microservices"]
+        candidate_service["Candidate Service (Microservice)"]
+        slot_seeker["Slot Seeker (Microservice)"]
+        interview_scheduler["Interview Scheduler (Microservice)"]
+        config_service["Config Service (Microservice)"]
+  end
+ subgraph subGraph3["Data Management"]
+        mongodb["MongoDB (NoSQL Database)"]
+        redis["Redis (In-memory Cache)"]
+        kafka["Kafka (Message Queue)"]
+  end
+ subgraph subGraph4["External Systems"]
+        interviewLogger["InterviewLogger (Applicant Tracking System)"]
+        messenger["Messenger (Messaging Platform)"]
+        myMindComputeProfile["MyMindComputeProfile (Skills and Profile Management)"]
+        mindComputeScheduler["MindComputeScheduler (Preferences and Coordination Rules)"]
+        leave_planner["LeavePlanner (PTO and Holiday Management)"]
+  end
+ subgraph subGraph5["RecruitX Next"]
+        subGraph0
+        Interfaces
+        Microservices
+        subGraph3
+        subGraph4
+  end
+    recruiter -- Initiates and manages interview scheduling --> dashboard
+    candidate -- Selects interview time slots --> notifier_service
+    interviewer -- Conducts interviews and manages availability --> google_calendar
+    dashboard -- Initiates interview scheduling --> candidate_service
+    dashboard -- Manual override actions --> interview_scheduler
+    dashboard -- Consumes interview events --> kafka
+    chatbot -- Forwards user messages --> chatbot_interpreter
+    chatbot_interpreter -- Queries availability --> slot_seeker
+    chatbot_interpreter -- Initiates scheduling --> interview_scheduler
+    candidate_service -- Requests available slots --> slot_seeker
+    candidate_service -- Forwards candidate selections --> interview_scheduler
+    candidate_service -- Publishes events --> kafka
+    slot_seeker -- Reads cached data --> mongodb
+    slot_seeker -- Reads/writes slot availability --> redis
+    slot_seeker -- Publishes AvailableSlotsGenerated events --> kafka
+    interview_scheduler -- Retrieves scoring configurations --> config_service
+    interview_scheduler -- Stores interview data --> mongodb
+    interview_scheduler -- Requests notifications --> notifier_service
+    interview_scheduler -- Publishes scheduling events --> kafka
+    notifier_service -- Creates and updates calendar events --> google_calendar
+    notifier_service -- Sends notifications --> messenger
+    notifier_service -- Publishes notification status --> kafka
+    config_service -- Stores configuration data --> mongodb
+    interviewLogger -- Receives webhooks and updates status --> candidate_service
+    google_calendar -- Accepts/Declines interviews --> interviewer
+    messenger -- Interacts via natural language --> recruiter
+    candidate -- Selects time slots --> notifier_service
