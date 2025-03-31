@@ -45,10 +45,14 @@ the hiring process.
 | [`ADRsList.md`](./docs/ADRsList.md)                     | List of ADRs                                   |
 | [`Diagrams.md`](./docs/Diagrams.md)                     | List of diagrams and flows                     |
 
+---
 
 ## 📘 Reference Docs
 
-- [`Glossary.md`](./docs/Glossary.md): Roles and domain terms used across the system
+| Doc Name                                    | Description                                   |
+|---------------------------------------------|-----------------------------------------------|
+| [`Glossary.md`](./docs/Glossary.md)         | Roles and domain terms used across the system |
+| [`UserJourneys.md`](./docs/UserJourneys.md) | Key User Journeys                             |
 
 ---
 
