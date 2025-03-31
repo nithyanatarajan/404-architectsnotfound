@@ -49,10 +49,11 @@ the hiring process.
 
 ## 📘 Reference Docs
 
-| Doc Name                                    | Description                                   |
-|---------------------------------------------|-----------------------------------------------|
-| [`Glossary.md`](./docs/Glossary.md)         | Roles and domain terms used across the system |
-| [`UserJourneys.md`](./docs/UserJourneys.md) | Key User Journeys                             |
+| Doc Name                                              | Description                                   |
+|-------------------------------------------------------|-----------------------------------------------|
+| [`Glossary.md`](./docs/Glossary.md)                   | Roles and domain terms used across the system |
+| [`UserJourneys.md`](./docs/UserJourneys.md)           | Key User Journeys                             |
+| [`AssumptionsAndFAQ.md`](./docs/AssumptionsAndFAQ.md) | Assumptions, Functional Decisions and FAQs    |
 
 ---
 
