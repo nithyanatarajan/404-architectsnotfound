@@ -40,14 +40,14 @@
 
 ## 5. `notifier-service` ⚠️
 
-- **Responsibility:** Sends notifications to interviewers/recruiters via Slack, email, or chatbot
+- **Responsibility:** Sends notifications to interviewers/recruiters via messenger, email, or chatbot
 - **Consumes:** Kafka events like scheduling, rescheduling, declines
 - **Resilience:** DLQ-enabled; supports reprocessing on transient failures
 
 ## 6. `feedback-collector`
 
 - **Responsibility:** Handles post-interview feedback intake and tracking
-- **Consumes:** InterviewLogger APIs, internal Slack triggers
+- **Consumes:** InterviewLogger APIs, internal notification triggers
 - **Writes to:** Mongo (optional); triggers follow-up reminders via Kafka
 
 ## 7. `chatbot` + `chatbot-interpreter` 🔥 🤖
