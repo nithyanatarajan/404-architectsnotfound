@@ -7,17 +7,29 @@ component boundaries.
 
 ## 🏗️ High-Level Design (HLD)
 
-- **Diagram**:  
-  ![HighLevelDesign.png](../images/HighLevelDesign.png)
+**Purpose**: Captures end-to-end system responsibilities, external integrations (InterviewLogger, MindComputeScheduler, Calendar), and
+major service roles.
+ 
+![HLD.png](../images/HLD.png)
 
-- **Purpose**: Captures end-to-end system responsibilities, external integrations (InterviewLogger, MindComputeScheduler, Calendar), and
-  major service roles.
+All internal REST calls are secured using a 🔐 **Secure Internal Mesh**:
 
-- **Highlights**:
-    - Event-driven microservices
-    - Config and cache ownership
-    - Secure communication via Kong + OIDC + OPA
-    - Observability and GitOps-based CI/CD pipelines
+- **Authentication:** Okta-issued JWTs (OIDC)
+- **Authorization:** OPA policies (RBAC)
+- **Encryption & Routing:** mTLS via Consul + Envoy
+
+**Microservice Responsibilities & Interactions:**
+
+| Service                 | Responsibility Summary                                                                                                    | Interactions                                                                                                   |
+|-------------------------|---------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
+| **Harvest Sync**        | Periodically fetches data from MyMindComputeProfile, MindComputeScheduler, LeavePlanner, Calendar                                           | ✅ Pulls from: External APIs<br>✅ Writes to: MongoDB                                                            |
+| **InterviewLogger Wrapper**  | Handles incoming webhook and API requests from InterviewLogger                                                                 | ✅ Consumes: InterviewLogger Webhook<br>✅ Calls: Candidate Service  <br>   ✅ Publishes: `interviewLogger-events`          |
+| **Candidate Service**   | Handles interview scheduling requests from InterviewLogger or dashboard <br> Also talks to MindComputeScheduler for sending schedule links | ✅ Publishes: `interview-schedule-queue`<br>✅ Calls: Slot Seeker, MindComputeScheduler <br> ✅ Consumes: `interviewLogger-events` |
+| **Slot Seeker**         | Computes valid time slots using availability, leave, and config rules                                                     | ✅ Reads: MongoDB (harvested data)<br>✅ Calls: Config Service                                                   |
+| **Interview Scheduler** | Scores and assigns interviewers for selected slots                                                                        | ✅ Consumes: `interview-schedule-queue`<br>✅ Calls: Config Service, Notifier Service                            |
+| **Notifier Service**    | Sends calendar invites, chat notifications, and emails                                                                    | ✅ Notifies: Calendar, Messenger, Email APIs                                                           |
+| **Config Service**      | Stores and serves scoring weights, preferences, and round rules                                                           | ✅ Reads/Writes: MongoDB<br>✅ Called by: Slot Seeker, Interview Scheduler                                       |
+| **Chatbot Interpreter** | Parses recruiter queries via Messenger, triggers slot/schedule                                                          | ✅ Invoked from: Messenger<br> ✅ Notifies: Messenger<br>✅ Calls: Slot Seeker, Interview Scheduler           |
 
 ---
 

@@ -7,16 +7,15 @@ evaluation criteria.
 
 ## 🏗️ Application Architecture
 
-| Component         | Tool / Tech                              | Purpose                                                         |
-|-------------------|------------------------------------------|-----------------------------------------------------------------|
-| Backend           | Go and Python                            | Polyglot backend for system services and AI tooling             |
-| Frontend          | Flutter with FlutterFlow                 | Cross-platform, performant frontend for the recruiter dashboard |
-| API Gateway       | Kong                                     | Routing, OIDC integration, API metering                         |
-| AuthN & AuthZ     | OIDC + OPA                               | Authentication and policy-based authorization                   |
-| Pub/Sub Messaging | Kafka + DLQs                             | Durable event-driven communication and resilience               |
-| Service Mesh      | Consul + Envoy                           | Secure service discovery, retries, and traffic control          |
-| Service Discovery | Consul                                   | Native K8s + multi-platform support                             |
-| Config & Cache    | Mongo (durable sync), Redis (read cache) | Fast, resilient slot lookup with scheduled background syncs     |
+| Component         | Tool / Tech              | Purpose                                                                 |
+|-------------------|--------------------------|-------------------------------------------------------------------------|
+| Backend           | Go and Python            | Polyglot backend for system services and AI tooling                     |
+| Frontend          | Flutter with FlutterFlow | Cross-platform, performant frontend for the recruiter dashboard         |
+| AuthN & AuthZ     | OIDC + OPA               | Authentication and policy-based authorization                           |
+| Pub/Sub Messaging | Kafka + DLQs             | Durable event-driven communication and resilience                       |
+| Service Mesh      | Consul + Envoy           | Secure routing, mTLS, retries, and observability across services        |
+| Service Discovery | Consul                   | Native K8s + multi-platform support                                     |
+| Config & Cache    | MongoDB with TTL indexes | Durable storage for config and availability data with auto-expiry logic |
 
 ## 🤖 AI & Chatbot Layer
 
@@ -39,6 +38,10 @@ evaluation criteria.
 | CI Tools          | GitHub Actions / GitLab CI | Linting, testing, image scan before delivery                    |
 | Local Dev         | k3s                        | Lightweight Kubernetes setup for fast local development         |
 
+> ⚠️ **Note**:
+> We have not evaluated integration with NEO platform yet.
+> Deployment tooling (Helm, ArgoCD, GitHub Actions) may change once NEO platform adoption is confirmed.
+
 ## 📊 Observability & Monitoring
 
 | Component  | Tool / Tech            | Purpose                      |
@@ -53,12 +56,11 @@ evaluation criteria.
 
 | Component   | Tool / Tech   | Purpose                                  |
 |-------------|---------------|------------------------------------------|
-| AuthN       | OIDC          | User authentication via identity token   |
+| AuthN       | OIDC          | User and service authentication          |
 | AuthZ       | OPA           | Policy-based access control              |
 | Secrets     | Vault         | Secrets and credentials management       |
 | Scanning    | Trivy         | Image scanning in CI pipelines           |
 | Trust Layer | Consul, Envoy | mTLS and service-level trust enforcement |
 
-✅ *This tech stack is cloud-agnostic, modular, cache-first, AI-ready platform optimized for scale, resilience, future
-evolution and secure delivery.*
-
+✅ *This tech stack is cloud-agnostic, modular, cache-first, and AI-ready — designed for resilience, scale, secure
+delivery, and future evolution.*
