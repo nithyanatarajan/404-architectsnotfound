@@ -9,7 +9,7 @@ component boundaries.
 
 **Purpose**: Captures end-to-end system responsibilities, external integrations (InterviewLogger, MindComputeScheduler, Calendar), and
 major service roles.
- 
+
 ![HLD.png](../images/HLD.png)
 
 All internal REST calls are secured using a 🔐 **Secure Internal Mesh**:
@@ -35,43 +35,23 @@ All internal REST calls are secured using a 🔐 **Secure Internal Mesh**:
 
 ## 🌍 C1: System Context Diagram
 
-- **Diagram**:  
-  ![SystemContext.png](../images/SystemContext.png)  
-  ![SystemContext-key.png](../images/SystemContext-key.png)
+**Purpose**: Shows RecruitX as a black box in relation to external users and systems
 
-- **Purpose**: Shows RecruitX as a black box in relation to external users and systems
+![SystemContext.png](../images/C1SystemContext.png)
 
-- **Recommended Nodes**:
-    - Users: Recruiters, Interviewers, Candidates
-    - External systems: InterviewLogger, MindComputeScheduler, MyMindComputeProfile, Calendar
-    - RecruitX platform boundary and core capabilities
+## 📦 C2: Container Diagram
 
----
+**Purpose**: Zoom into the RecruitX system and show major containers/services and their interactions
 
-## 📦 C2: Container Diagram (Planned)
+![ContainerDiagram.png](../images/C2ContainerDiagram.png)
 
-- **Purpose**: Zoom into the RecruitX system and show major containers/services and their interactions
+## 🧠 C3: Component Diagram – `interview-scheduler` (WIP)
 
-- **To Cover**:
-    - Key microservices: `candidate-service`, `interview-scheduler`, `slot-seeker`, `calendar-adapter`, etc.
-    - Infrastructure components: Kafka, Mongo, Redis, Config-service
-    - Cross-service flows: Event vs API
+**Purpose**: Show internal structure of the scheduler service
 
----
+![ComponentDiagram.png](../images/C3ComponentDiagram.png)
 
-## 🧠 C3: Component Diagram – `interview-scheduler` (Planned)
+## 🧩 C4: Component Diagram – `interview-scheduler` (WIP)
 
-- **Purpose**: Show internal structure of the scheduler service
-- **To Cover**:
-    - Event consumers (e.g., `InterviewRequested`, `SlotSelected`)
-    - Scoring engine using `config-service` rules
-    - Calendar and availability lookups
-    - Slot conflict resolution logic
-    - Outgoing events and system triggers
-
----
-
-## ✅ To-Do
-
-- [ ] Finalize container breakdown for C2
-- [ ] Add C3 for `interview-scheduler`
+**Purpose**: Show internal structure of the scheduler service
+![CodeDiagram.png](../images/C4CodeDiagram.png)

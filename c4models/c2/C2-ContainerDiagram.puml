@@ -5,81 +5,89 @@
 !define EXTERNAL_SYSTEM rectangle
 !define DATABASE database
 
+TITLE RecruitX Next – C2 Container Diagram
+
 ' People
 PERSON "Recruiter" as recruiter
 PERSON "Candidate" as candidate
 PERSON "Interviewer" as interviewer
 
-' External Systems
-EXTERNAL_SYSTEM "InterviewLogger\n==\nApplicant Tracking System" as interviewLogger
-EXTERNAL_SYSTEM "MyMindComputeProfile\n==\nTechnical Assessment" as myMindComputeProfile
-EXTERNAL_SYSTEM "LeavePlanner" as leavePlanner
-EXTERNAL_SYSTEM "Calendar" as calendar
-EXTERNAL_SYSTEM "MindComputeScheduler" as mindComputeScheduler
-EXTERNAL_SYSTEM "Messenger" as Messenger
-
-' System Boundary
-SYSTEM_BOUNDARY "RecruitX Next System" as recruitXSystem {
-  ' Microservices (Containers)
-  CONTAINER "interviewLogger-wrapper\n==\nInterface layer between\nInterviewLogger and internal services" as interviewLoggerWrapper
-  
-  CONTAINER "candidate-service\n==\nManages candidate interview\nrequest lifecycle" as candidateService
-  
-  CONTAINER "slot-seeker\n==\nComputes matching slots\nfrom available data" as slotSeeker
-  
-  CONTAINER "interview-scheduler\n==\nFinalizes slot assignment and\ngenerates interviewer invites" as interviewScheduler
-  
-  CONTAINER "notifier-service\n==\nSends notifications to\ninterviewers/recruiters" as notifierService
-  
-  CONTAINER "chatbot\n==\nNLP-powered interface for recruiters" as chatbot
-  
-  CONTAINER "chatbot-interpreter\n==\nProcesses NLP queries" as chatbotInterpreter
-  
-  CONTAINER "dashboard-service\n==\nProvides UI-backed reports\nand insights" as dashboardService
-  
-  CONTAINER "harvest-sync\n==\nPeriodically fetches data\nfrom external systems" as harvestSync
-  
-  CONTAINER "config-service\n==\nStores tunable weights,\nround logic, rule configs" as configService
-  
-  ' Databases
-  DATABASE "MongoDB\n==\nDurable sync cache + configs" as mongodb
-  DATABASE "Interview Queue\n==\n(Kafka)" as interviewQueue
+' External Systems Group
+package "External Systems" {
+  EXTERNAL_SYSTEM "InterviewLogger\n(ATS)" as interviewLogger
+  EXTERNAL_SYSTEM "MyMindComputeProfile\n(Skills)" as myMindComputeProfile
+  EXTERNAL_SYSTEM "LeavePlanner" as leavePlanner
+  EXTERNAL_SYSTEM "Calendar" as calendar
+  EXTERNAL_SYSTEM "MindComputeScheduler\n(Candidate Slot UI)" as mindComputeScheduler
+  EXTERNAL_SYSTEM "Messenger\n(Chatbot Platform)" as Messenger
 }
 
-' External connections
-recruiter -down-> chatbot : "Uses"
-recruiter -down-> dashboardService : "Views reports"
-candidate -down-> mindComputeScheduler : "Selects slots"
-interviewLoggerWrapper -right-> interviewLogger : "Receives webhooks,\nupdates schedule"
+' RecruitX System
+SYSTEM_BOUNDARY "RecruitX Next System" as recruitX {
 
-' Connection to external systems
-harvestSync -up-> myMindComputeProfile : "Fetches data"
-harvestSync -up-> leavePlanner : "Fetches data"
-harvestSync -up-> calendar : "Fetches data"
-harvestSync -up-> mindComputeScheduler : "Fetches data"
-notifierService -up-> Messenger : "Sends notifications"
-notifierService -up-> calendar : "Schedules interviews"
+  package "Interface Layer" {
+    CONTAINER "interviewLogger-wrapper\n==\nHandles InterviewLogger webhooks" as interviewLoggerWrapper
+    CONTAINER "chatbot\n==\nChat interface for scheduling" as chatbot
+    CONTAINER "dashboard-service\n==\nRead-only fallback & reporting UI" as dashboard
+  }
 
-' Internal connections
-interviewLoggerWrapper -down-> candidateService : "Webhooks for candidate updates"
-candidateService -right-> slotSeeker : "Queries for available slots"
-candidateService -right-> mindComputeScheduler : "Forwards slot list"
-mindComputeScheduler -left-> candidateService : "Selected slot webhook"
-candidateService -down-> interviewScheduler : "Forwards selected slot"
+  package "Core Services" {
+    CONTAINER "candidate-service\n==\nOrchestrates scheduling lifecycle" as candidateService
+    CONTAINER "slot-seeker\n==\nComputes valid interview slots" as slotSeeker
+    CONTAINER "interview-scheduler\n==\nPicks interviewers, finalizes slot" as scheduler
+    CONTAINER "notifier-service\n==\nSends Calendar invites, Messenger alerts" as notifier
+    CONTAINER "chatbot-interpreter\n==\nNLP intent parser for chatbot" as interpreter
+  }
 
-slotSeeker -up-> harvestSync : "Gets availability data"
-slotSeeker -down-> configService : "Gets configuration"
-slotSeeker <-left- interviewScheduler : "Gets scheduled slots"
+  package "Config Layer" {
+    CONTAINER "config-service\n==\nManages weights, thresholds, rules" as config
+  }
 
-interviewScheduler -down-> interviewQueue : "Publishes scheduled interviews"
-notifierService -up-> interviewQueue : "Consumes scheduled interviews"
+  package "Data Layer" {
+    CONTAINER "harvest-sync\n==\nPeriodic sync from external systems" as harvester
+    DATABASE "MongoDB\n==\nCached interviewer data + configs" as mongodb
+    DATABASE "Kafka Topics\n==\nInterview events + DLQs" as kafka
+  }
+}
 
-chatbot -right-> chatbotInterpreter : "Processes NLP queries"
-chatbotInterpreter -down-> slotSeeker : "Queries slots"
-chatbotInterpreter -down-> interviewScheduler : "Triggers scheduling"
+' === Recruiter & Candidate Flow ===
+recruiter --> chatbot : Initiates scheduling (NLP)
+chatbot --> interpreter : Sends recruiter query
+interpreter --> slotSeeker : Fetches availability
+interpreter --> scheduler : Triggers slot request
 
-dashboardService -right-> interviewLoggerWrapper : "Gets candidate data"
+recruiter --> dashboard : Views reports, status
+dashboard --> interviewLoggerWrapper : Pulls candidate data
 
-harvestSync -down-> mongodb : "Writes sync data"
-configService -left-> mongodb : "Stores/reads configuration"
+candidate --> mindComputeScheduler : Selects slot via link
+
+' === InterviewLogger Flow ===
+interviewLogger -.-> interviewLoggerWrapper : Sends webhook
+interviewLoggerWrapper --> candidateService : Forwards candidate info
+
+' === Scheduling Workflow ===
+candidateService --> slotSeeker : Gets slot options
+candidateService --> mindComputeScheduler : Sends options to candidate
+mindComputeScheduler -.-> candidateService : Selected slot webhook
+candidateService --> scheduler : Sends final slot
+
+scheduler --> slotSeeker : Validates slot
+scheduler --> config : Applies scoring
+scheduler -.-> kafka : Publishes scheduled interview
+
+notifier -.-> kafka : Subscribes to event
+notifier --> calendar : Sends invite
+notifier --> Messenger : Sends alert
+
+' === Data Layer ===
+harvester -.-> myMindComputeProfile : Sync skills
+harvester -.-> leavePlanner : Sync PTO
+harvester -.-> mindComputeScheduler : Sync preferences
+harvester -.-> calendar : Sync availability
+harvester --> mongodb : Write cache
+
+slotSeeker --> config : Get rules
+slotSeeker --> mongodb : Read data
+config --> mongodb : Store rules
+
 @enduml

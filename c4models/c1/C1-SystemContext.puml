@@ -1,38 +1,41 @@
 @startuml
 !include <C4/C4_Context>
 
-TITLE RecruitX Next -  C1 System Context Diagram
+TITLE RecruitX Next – C1 System Context Diagram
 
+' People
 Person(recruiter, "Recruiter", "Manages candidate interviews and scheduling")
 Person(candidate, "Candidate", "Applies for positions and selects interview slots")
 Person(interviewer, "Interviewer", "Conducts interviews with candidates")
 
-System(recruitXSystem, "RecruitX Next", "Recruitment and interview scheduling platform that manages the entire interview lifecycle from candidate application to interview completion")
+' System
+System(recruitXSystem, "RecruitX Next", "Interview scheduling platform that manages end-to-end workflows")
 
+' External Systems
 System_Ext(interviewLogger, "InterviewLogger", "Applicant Tracking System")
-System_Ext(myMindComputeProfile, "MyMindComputeProfile", "Skills and technical assessment")
+System_Ext(myMindComputeProfile, "MyMindComputeProfile", "Employee skills and technical assessment")
 System_Ext(leavePlanner, "LeavePlanner", "Employee leave management")
-System_Ext(calendar, "Calendar", "Calendar service for scheduling")
-System_Ext(mindComputeScheduler, "MindComputeScheduler", "Interview scheduling platform")
+System_Ext(calendar, "Calendar", "Primary calendar platform for interviewers")
+System_Ext(mindComputeScheduler, "MindComputeScheduler", "Candidate-facing interview coordination platform")
 System_Ext(Messenger, "Messenger", "Communication platform")
 
-Rel(recruiter, recruitXSystem, "Uploads resumes, configures interviews, views status, uses chatbot")
-Rel(candidate, recruitXSystem, "Selects available interview slots")
+' Human → System
+Rel(recruiter, recruitXSystem, "Uses chatbot or dashboard to schedule, reschedule, view interviews")
+Rel(candidate, recruitXSystem, "Selects interview slots via MindComputeScheduler-generated link")
 Rel(interviewer, recruitXSystem, "Receives interview notifications, provides availability")
 
-Rel(recruitXSystem, interviewLogger, "Integrates with for candidate data")
-Rel(interviewLogger, recruitXSystem, "Sends webhooks on candidate updates")
+' RecruitX → External Systems
+Rel(recruitXSystem, interviewLogger, "Pulls candidate data, receives webhook triggers")
+Rel(interviewLogger, recruitXSystem, "Sends webhooks for scheduling triggers")
 
-Rel(recruitXSystem, myMindComputeProfile, "Fetches technical skills data")
-Rel(recruitXSystem, leavePlanner, "Checks employee availability")
+Rel(recruitXSystem, myMindComputeProfile, "Fetches skill data for interviewer matching")
+Rel(recruitXSystem, leavePlanner, "Checks interviewer availability")
 Rel(recruitXSystem, calendar, "Schedules interviews and checks availability")
 
 Rel(recruitXSystem, mindComputeScheduler, "Sends available slots to candidates")
-Rel(mindComputeScheduler, recruitXSystem, "Notifies of candidate slot selection")
+Rel(mindComputeScheduler, recruitXSystem, "Pushes selected slot via webhook")
 
-Rel(recruitXSystem, Messenger, "Sends notifications to recruiters and interviewers")
+Rel(Messenger, recruitXSystem, "Triggers scheduling flows via chatbot")
+Rel(recruitXSystem, Messenger, "Sends notifications, fallback alerts, insights")
 
-UpdateRelStyle(candidate, recruitXSystem, $textColor="blue", $lineColor="blue")
-UpdateRelStyle(recruiter, recruitXSystem, $textColor="red", $lineColor="red")
-UpdateRelStyle(interviewer, recruitXSystem, $textColor="green", $lineColor="green")
 @enduml
