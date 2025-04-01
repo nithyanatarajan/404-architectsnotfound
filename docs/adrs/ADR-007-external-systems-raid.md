@@ -1,4 +1,4 @@
-# ADR-005b: External Integration Assumptions and Risks
+# ADR-007: External Integration Assumptions and Risks
 
 ## Status
 

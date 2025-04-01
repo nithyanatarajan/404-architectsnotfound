@@ -1,4 +1,4 @@
-# ADR-008: Shift-Left Security Practices
+# ADR-011: Shift-Left Security Practices
 
 ## Status
 
@@ -6,29 +6,40 @@ Accepted
 
 ## Context
 
-Security must be embedded early, not retrofitted. We needed a developer-centric approach to secure images, secrets, and
-runtime APIs.
+Security must be embedded **early in the development lifecycle**, not as a post-deployment step. We needed a
+developer-friendly approach that secures:
+
+- Container images
+- Secrets and tokens
+- API access and authorization
+- Internal service communication
 
 ## Decision
 
-We adopted:
+We adopted the following shift-left security practices:
 
-- **Vault** for secrets and token rotation
-- **Trivy** to scan container images in CI
-- **OPA** for RBAC, integrated with Kong request pipeline (post-OIDC auth)
-- **TLS & mTLS** in internal services via Envoy
+- **Vault** for secure secrets management and token rotation
+- **Trivy** to scan container images during CI for vulnerabilities
+- **OPA (Open Policy Agent)** for RBAC, integrated with Kong after OIDC-based authentication
+- **TLS & mTLS** enforced between internal services using **Envoy** (part of the Consul service mesh)
 
 ## Consequences
 
-- ✅ Reduces risk of vulnerabilities at build and runtime
-- ✅ Automates several security best practices
-- ⚠️ Requires secret and policy lifecycle management
+- ✅ Early detection of vulnerabilities before runtime
+- ✅ Secure secrets injection and lifecycle rotation
+- ✅ Fine-grained access control at the API gateway level
+- ⚠️ Requires disciplined management of secrets, policies, and TLS certificates
 
 ## Alternatives Considered
 
-- Static secrets in ENV or Kubernetes Secrets
-- Post-deploy scanning only
+- **Static secrets in ENV or Kubernetes Secrets**  
+  ✘ Rejected due to lack of rotation, auditability, and encryption-at-rest
+
+- **Post-deployment scanning only**  
+  ✘ Rejected as it increases exposure window and delays remediation
 
 ## Related Docs
 
 - [`DeploymentStrategy.md`](../DeploymentStrategy.md)
+- [`Techstack.md`](../Techstack.md)
+- [`ADR-003-tech-stack-choice.md`](./ADR-003-tech-stack-choice.md)

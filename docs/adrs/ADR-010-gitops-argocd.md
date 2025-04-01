@@ -1,4 +1,4 @@
-# ADR-007: GitOps with ArgoCD
+# ADR-010: GitOps with ArgoCD
 
 ## Status
 
@@ -6,43 +6,47 @@ Accepted
 
 ## Context
 
-We need a reproducible, auditable, and automated way to manage deployments across dev, staging, and prod environments.
-Traditional CI/CD tools (like GoCD or Jenkins) require manual promotion logic and lack drift detection.
+We need a **reproducible**, **auditable**, and **automated** mechanism to manage deployments across environments (dev,
+staging, prod). Traditional CI/CD tools (e.g., GoCD, Jenkins) often:
 
-GitOps offers:
+- Require imperative, script-based workflows
+- Lack drift detection
+- Have limited auditability
 
-- Git as the single source of truth
-- Declarative infrastructure and application state
-- Automatic reconciliation between Git and cluster
+**GitOps** solves this by:
+
+- Treating Git as the single source of truth
+- Using declarative manifests (Helm/Kustomize) for environment state
+- Ensuring automatic reconciliation between Git and cluster
 
 ## Decision
 
-We chose **ArgoCD** as our GitOps tool to manage Kubernetes deployments. Key practices:
+We selected **ArgoCD** as our GitOps delivery tool. Key components of our approach:
 
-- **Helm charts** are stored and versioned in Git
-- **Environment-specific values.yaml** are generated or maintained per environment (e.g., dev, staging, prod)
-- ArgoCD watches Git and syncs to the target cluster accordingly
-- **GitHub Actions** or **GitLab CI** handles image builds, testing, vulnerability scanning, and image pushes
+- **Helm charts** are stored and versioned in Git for each microservice
+- **Environment-specific values.yaml** files or overlays define config per environment
+- **ArgoCD watches the Git repository**, applies changes automatically to target clusters
+- **CI pipelines (GitHub Actions / GitLab CI)** handle build, test, scan, and image publish stages
 
-CI pipelines are responsible for:
+### CI Workflow:
 
-1. Building the service and container image
-2. Tagging and pushing the image to the container registry
-3. Updating the Helm `values.yaml` or Kustomize overlays in Git with the new image tag
-4. Committing the change to Git (which ArgoCD then picks up and applies)
+1. Build and tag Docker image
+2. Push to container registry
+3. Update Helm values with new image tag
+4. Commit the change to Git (which ArgoCD detects and applies)
 
 ## Consequences
 
-- ✅ Clear separation between **build (CI)** and **deploy (ArgoCD)**
-- ✅ Git history becomes the audit log of deployments
-- ✅ Supports preview environments and rollout strategies (e.g., blue-green, canary)
-- ⚠️ Requires good Git hygiene and values templating discipline
-- ⚠️ Developers must understand GitOps flow for troubleshooting
+- ✅ Decouples CI (build/test) from CD (deploy)
+- ✅ Git history acts as an audit trail for every deployment
+- ✅ Enables progressive delivery strategies (e.g., blue-green, canary)
+- ⚠️ Requires **strict Git hygiene** and values templating discipline
+- ⚠️ Developers must understand the **GitOps model** for troubleshooting and rollback
 
 ## Alternatives Considered
 
-- **GoCD or Jenkins**: Imperative, state-less, and harder to trace
-- **Helm CLI / kubectl apply**: Manual, not auditable, no drift detection
+- **GoCD or Jenkins**: Imperative pipelines, no declarative state tracking
+- **Manual `kubectl` or Helm CLI**: No audit trail, not scalable, no drift detection
 
 ## Related Docs
 

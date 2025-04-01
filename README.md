@@ -111,7 +111,7 @@ Refer to [`TraceabilityMatrix.md`](./docs/TraceabilityMatrix.md) for complete ma
 | ADR-010 | [ADR-010-gitops-argocd.md](./docs/adrs/ADR-010-gitops-argocd.md)                         | GitOps with ArgoCD                         |
 | ADR-011 | [ADR-011-shift-left-security.md](./docs/adrs/ADR-011-shift-left-security.md)             | Shift-Left Security                        |
 | ADR-012 | [ADR-012-nlp-chatbot.md](./docs/adrs/ADR-012-nlp-chatbot.md)                             | NLP Chatbot Capabilities                   |
-| ADR-013 | [ADR-013-manual-dashboard-fallback.md](./docs/adrs/ADR-013-manual-dashboard-fallback.md) | Manual Dashboard Fallbacks                 |
+| ADR-013 | [ADR-013-manual-fallback.md](./docs/adrs/ADR-013-manual-fallback.md)                     | Manual Dashboard Fallbacks                 |
 
 ---
 

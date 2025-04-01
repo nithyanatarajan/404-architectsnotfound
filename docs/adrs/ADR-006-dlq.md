@@ -23,7 +23,7 @@ intervention.
 | **Alerting**                  | DLQ volumes and error types are surfaced in the internal dashboard. Recruiters/admins are alerted if failure impacts data freshness or scheduling workflows.   |
 | **DLQ Visibility**            | DLQ access and visibility is controlled via **RBAC**. Not all users can replay or inspect contents.                                                            |
 | **Error Logging**             | All DLQ messages are logged with the original payload, failure reason, and retry metadata for debugging.                                                       |
-| **Idempotency Requirement**   | Consumers are designed to be **idempotent** so DLQ replays do not cause duplication or state corruption.                                                       |
+| **Idempotency Requirement**   | Consumers are designed to be **idempotent**, so DLQ replays do not cause duplication or state corruption.                                                      |
 | **Examples of DLQ scenarios** | - MyMindComputeProfile API unreachable during refresh<br>- Interview schedule creation fails due to missing interviewer<br>- Rescheduling logic fails due to race conditions |
 
 ## Consequences

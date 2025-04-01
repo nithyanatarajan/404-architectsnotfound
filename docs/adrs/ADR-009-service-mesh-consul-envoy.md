@@ -1,4 +1,4 @@
-# ADR-006: Service Mesh with Consul + Envoy
+# ADR-009: Service Mesh with Consul + Envoy
 
 ## Status
 
@@ -6,34 +6,42 @@ Accepted
 
 ## Context
 
-Inter-service communication requires:
+Inter-service communication within RecruitX must support:
 
-- Load balancing
-- Retry logic
-- mTLS security
-- Traffic observability
+- **Load balancing** between replicas
+- **Retry logic** for transient failures
+- **mTLS encryption** to secure internal traffic
+- **Traffic observability** to trace failures and latencies
 
-We needed a solution that didn't require app-level logic or custom libraries.
+These features must be implemented **without embedding logic** inside each microservice.
 
 ## Decision
 
-We adopted:
+We adopted a **service mesh** pattern using:
 
-- **Consul** for service discovery and mesh config
-- **Envoy** as a sidecar proxy for traffic routing, retry, and telemetry
+- **Consul** for service discovery, health checking, and mesh configuration
+- **Envoy** sidecar proxies for:
+    - mTLS enforcement
+    - Retry/backoff logic
+    - Request-level metrics and distributed tracing
+
+This allows secure, observable service-to-service communication across Kubernetes pods with minimal developer effort.
 
 ## Consequences
 
-- ✅ Uniform observability and security
-- ✅ Fine-grained traffic control (timeouts, retries, etc.)
-- ⚠️ More infra setup per pod (sidecars)
-- ⚠️ Consul agents need HA management
+- ✅ Uniform security (mTLS) and observability across all services
+- ✅ Built-in circuit breaking, retries, timeouts via Envoy
+- ✅ Consul provides first-class support for multi-platform discovery
+- ⚠️ Requires additional sidecar containers per pod (increased resource usage)
+- ⚠️ Consul cluster and agents need to be highly available and observable
+- ⚠️ Learning curve for fine-tuning mesh policies and Envoy configuration
 
 ## Alternatives Considered
 
-- Linkerd: Lighter but less flexible
-- Istio: Powerful but too heavy for our current scale
+- **Linkerd**: Simpler and lighter, but less flexible and mature for policy enforcement.
+- **Istio**: Feature-rich but complex; considered overkill for our scale and current needs.
 
 ## Related Docs
 
 - [`DeploymentStrategy.md`](../DeploymentStrategy.md)
+- [`ArchitectureStyle.md`](../ArchitectureStyle.md) – Secure Internal Mesh

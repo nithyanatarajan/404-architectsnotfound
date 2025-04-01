@@ -7,53 +7,53 @@ Accepted
 ## Context
 
 The RecruitX platform integrates with multiple third-party systems (Calendar, MyMindComputeProfile, LeavePlanner, MindComputeScheduler),
-each with varying SLAs and API behaviors. Direct, real-time access to these systems introduces risk due to potential
-downtime, latency, or throttling. For performance, resilience, and consistency across services, we adopted a
-**cache-as-primary read pattern** — where all reads are served from cached data, and cache freshness is managed
-asynchronously.
+each with varying SLAs, reliability, and latency profiles. Direct, real-time reads from these systems introduce risks of
+API failure, throttling, and user-visible latency.
+
+To ensure fast, resilient, and consistent user experience, we adopted a **cache-as-primary read pattern** — where all
+reads are served from periodically refreshed cache (MongoDB), and no service directly calls external APIs at runtime.
 
 ## Decision
 
-| Aspect                  | Decision                                                                                                                                                    |
-|-------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Cache Read Path**     | All reads (chatbot, scheduler, dashboard) are served from cached data. External API calls are never made at request time.                                   |
-| **Write/Sync Path**     | Background refresh jobs or workers pull data from external systems and update the cache on a schedule (e.g., Calendar: 30 min, MyMindComputeProfile: daily).              |
-| **Fallbacks**           | If a refresh fails, the system serves **last known data** from cache and alerts the recruiter. After 3 consecutive failures, the affected flows are paused. |
-| **Staleness Awareness** | Cached records include timestamps to indicate freshness. UIs (chatbot, dashboard) display these transparently.                                              |
-| **Service Behavior**    | All consumer services (chatbot, scheduler, matching engine) are **decoupled from external APIs**, improving testability and uptime.                         |
-| **Performance Impact**  | Fast lookup from cache reduces latency and protects the system from external dependency slowness.                                                           |
-| **Observability**       | Cache sync status, TTLs, and failures are monitored and surfaced via internal dashboards.                                                                   |
-| **Configuration**       | Cache refresh intervals, TTLs, and retry thresholds are configurable per data source.                                                                       |
+| Aspect                  | Decision                                                                                                                                            |
+|-------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Cache Read Path**     | All reads (chatbot, scheduler, dashboard) are served from MongoDB, refreshed via background jobs. No live external API calls occur at request time. |
+| **Write/Sync Path**     | `harvest-sync` periodically pulls data from external systems (Calendar: every 30 min; MyMindComputeProfile/Leave: daily) and writes to MongoDB.                   |
+| **Fallbacks**           | On sync failure, system continues using stale data and raises alerts. After 3 failures (configurable), impacted flows may pause.                    |
+| **Staleness Awareness** | Records are stored with `last_updated` timestamps. UI components display these for visibility.                                                      |
+| **Service Behavior**    | All internal services are decoupled from external systems. They query only the cache (MongoDB) to ensure testability and fault isolation.           |
+| **Performance Impact**  | MongoDB provides fast document lookups; all user-facing reads benefit from low latency even under external downtime.                                |
+| **Observability**       | All sync jobs emit metrics on freshness, failures, and TTL expiry. Failures are logged and monitored via Prometheus + Grafana.                      |
+| **Configuration**       | Sync intervals, TTL values, and retry policies are managed via config and can be updated without redeployment.                                      |
 
 ## Consequences
 
-- System can operate in degraded mode with stale data if external APIs are unavailable.
-- Requires observability for staleness, alerting, and sync job failures.
-- Introduces slight complexity in maintaining sync jobs and cache TTL policies.
-- All logic must defensively handle possibly outdated or incomplete data.
+- The system can continue operating (with stale data) when integrations are temporarily unavailable.
+- Requires maintenance of refresh job cadence, TTL policies, and failure alerting.
+- Services must treat cached data as potentially outdated and defensively handle gaps.
+- MongoDB may grow in size unless TTL indexing is carefully enforced.
 
 ## Alternatives Considered
 
 - **Live API reads on demand**  
-  ✘ Rejected due to latency, rate-limiting, and reliability issues from 3rd-party systems.
+  ✘ Rejected due to third-party latency, quota limits, and risk of blocking user flows.
 
-- **Hybrid mode (cache first, fallback to API)**  
-  ✘ Rejected for simplicity and consistency. This would introduce inconsistent behavior between components.
+- **Hybrid mode (cache-first, fallback to live)**  
+  ✘ Rejected to avoid inconsistencies and complexity across services.
 
-- **Materialized views in database**  
-  ✘ Rejected for lack of flexibility and decoupling. Redis is better suited for fast lookup and TTL.
+- **Redis for fast cache**  
+  ✘ Removed due to complexity of expiry coordination and operational overhead in refresh tuning.
 
 ## Decision Drivers
 
-- Reliability under partial failure of external systems
-- Performance for chatbot and scheduling flows
-- Predictable, low-latency UX
-- Clean separation of sync logic from core business logic
-- Simplified integration testing
+- Resilience to third-party outages
+- Predictable low-latency experience for chatbot and dashboard
+- Simplified sync-vs-read separation of concerns
+- Clear observability and alerting on data freshness
 
 ## Related Docs
 
 - [`AssumptionsAndFAQ.md`](../AssumptionsAndFAQ.md) – Section 2: Integrations & Data Flow
-- [`Microservices.md`](../Microservices.md) – InterviewerAvailabilityService, CacheRefreshJob
+- [`Microservices.md`](../Microservices.md) – `harvest-sync`, cache responsibilities
 - [`ArchitectureStyle.md`](../ArchitectureStyle.md) – Read-from-cache-first architecture
-- [`Tradeoffs.md`](../Tradeoffs.md) – Availability over consistency
+- [`Tradeoffs.md`](../Tradeoffs.md) – Availability over strict consistency
