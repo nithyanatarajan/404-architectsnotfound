@@ -1,116 +1,135 @@
-
-# RecruitX – Updated User Journeys (No Redis)
-
----
+# Key User Journeys – RecruitX
 
 ## 🚪 Entry Points – Interview Scheduling Triggers
 
 RecruitX supports three distinct initiation channels:
 
 1. **📨 InterviewLogger Webhook**
-    - Webhook triggered when a candidate reaches the "Ready to Schedule" stage.
-    - `InterviewLogger Wrapper` receives it and inserts a scheduling request into a Kafka-backed queue.
-    - `Candidate Service` listens to this queue.
+    - Triggered when a candidate reaches the "Ready to Schedule" stage.
+    - `InterviewLogger Wrapper` receives the webhook and enqueues a scheduling request via Kafka.
+    - `Candidate Service` listens to this queue and initiates the flow.
 
 2. **💬 Chatbot Interface**
-    - Recruiter types natural language queries (e.g., “Schedule Java round for Ananya”)
-    - Parsed by the `Chatbot Interpreter`
-    - Interacts with `Slot Seeker` and `Interview Scheduler` via REST APIs
+    - Recruiter types natural language queries (e.g., “Schedule Java round for Ananya”).
+    - Parsed by the `Chatbot Interpreter`.
+    - Interacts with `Slot Seeker` and `Interview Scheduler` via internal REST APIs.
 
 3. **🖥️ Dashboard**
-    - Flutter-based UI lets recruiters initiate/reschedule interviews and view statuses.
-    - Talks to green house wrapper using REST apis
+    - Flutter-based UI allows recruiters to **view** interview statuses and reports.
+    - (In MVP, dashboard does **not** support initiating or rescheduling interviews.)
+    - Connects to InterviewLogger Wrapper via REST APIs for candidate and status info.
 
-All paths converge to the following components:
-- `Candidate Service` → writes scheduling request
-- `Slot Seeker` → evaluates available slots using interviewer data, candidate data config weights
-- `Interview Scheduler` → selects interviewers based on config weights and selected slots
-- `Notifier Service` → sends updates to Calendar, InterviewLogger, candidate, and recruiter
+All paths converge into the scheduling pipeline:
 
-> 💡 All slot evaluations and interviewer availability checks are done by internal services.
-> No Redis or external API reads are made at runtime — data is pre-synced.
+- `Candidate Service` → creates a scheduling request
+- `Slot Seeker` → evaluates slots using interviewer metadata and config weights
+- `Interview Scheduler` → picks best-fit interviewers
+- `Notifier Service` → sends updates to Calendar, InterviewLogger, and recruiter
+
+> 💡 No Redis is used. All runtime reads are served from MongoDB (pre-synced).  
+> External APIs are accessed only by sync jobs — not during live request handling.
 
 ---
 
 ## 🧍 Recruiter Journey – Scheduling an Interview
 
-- Recruiter moves candidate to “Ready to Schedule” in InterviewLogger
-- InterviewLogger emits webhook → `InterviewLogger Wrapper` → Kafka Queue
-- `Candidate Service` parses the resume and gets candidate information for scheduling interviews:
-  - Candidate’s round and tech stack
-- `Slot Seeker` generates available slots using:
-  - MongoDB (pre-synced data from `Harvest Sync`)
-  - Config logic from `Config Service`
-  - Sends list of available slots to the `Candidate Service`
-- The `Candidate Service` sends the available slots to `Good Time`, which will send the information to the candidate
-- `Candidate Service` listens to the `Good Time` webhook for selected slot details and forwards the selected slots to the `Interview Schedule`
-- `Interview Scheduler` consumes data from `Config Service` and `Slot Seeker` to find the top matching interviewers and sends the data to `Notifier Service`
-- `Notifier Service` will notify the interviewers google calendar, candidate's calendar and messenger
+1. Recruiter moves a candidate to “Ready to Schedule” in InterviewLogger.
+2. InterviewLogger emits a webhook → `InterviewLogger Wrapper` → Kafka queue.
+3. `Candidate Service`:
+    - Parses the resume and fetches round + skill requirements.
+4. `Slot Seeker`:
+    - Reads from MongoDB (synced via `Harvest Sync`)
+    - Uses weights/configs from `Config Service`
+    - Returns list of valid time slots.
+5. `Candidate Service` sends the slots to MindComputeScheduler (which shares them with the candidate).
+6. Candidate selects a slot → `MindComputeScheduler` webhook hits RecruitX → forwarded to `Interview Scheduler`.
+7. `Interview Scheduler`:
+    - Uses rules from `Config Service` + slot info from `Slot Seeker`
+    - Selects interviewers and pushes event to `Notifier Service`.
+8. `Notifier Service`:
+    - Updates Calendar, InterviewLogger, and sends recruiter/candidate notifications via chat/email.
 
 ---
 
 ## 🔁 Rescheduling Flow
 
-- Triggers:
-  - Candidate declines or cancels
-  - Interviewer declines calendar invite
-- `Interview Scheduler` re-initiates if:
-  - Reschedule is within allowed threshold
-  - Config allows auto-pick
-- If outside threshold, recruiter is notified manually
+Triggers:
+
+- Candidate cancels or declines
+- Interviewer declines invite or is unavailable
+
+Flow:
+
+- `Interview Scheduler` attempts auto-reschedule if:
+    - Within allowed retry threshold
+    - Auto-pick is enabled in config
+- If not, fallback alert is sent to recruiter via email + chatbot.
 
 ---
 
 ## 🤖 Chatbot Interaction Flow
 
 - Recruiter asks: “Who’s free for DS round next Tuesday?”
-- `Chatbot Interpreter` parses query:
-  - Role: DS
-  - Date: Next Tuesday
-- Interacts with:
-  - `Slot Seeker` to generate possible interviewer-time combinations
-  - `Config Service` to apply scoring rules
-- Sends back a response with:
-  - Top interviewers
-  - Scores, capacity, prior round performance
-- Recruiter can respond: “Book Arjun at 3 PM” → creates a schedule request
+- `Chatbot Interpreter` parses:
+    - Role: DS
+    - Date: Next Tuesday
+- Services used:
+    - `Slot Seeker` → generates availability
+    - `Config Service` → scoring and rule weights
+- Bot responds with:
+    - Top matching interviewers
+    - Scores, load info, prior round experience
+- Recruiter replies: “Book Arjun at 3 PM” → a schedule request is created.
+
+> 💬 Chatbot supports scheduling, rescheduling, and slot discovery  
+> All data is from the central MongoDB cache
 
 ---
 
 ## 💻 Recruiter Dashboard
 
-- Displays real-time state using data from:
-  -InterviewLogger APIs
+- UI shows **real-time status** based on:
+    - InterviewLogger APIs
+    - Internal scheduling status
 - Sections include:
-  - 📅 Interview Calendar
-  - ✅ Status per round/candidate
-  - 🧠 Insights on scheduling load
-  - 📊 Reports exportable in CSV/PDF
+    - 📅 Interview Calendar
+    - ✅ Per-round/candidate status
+    - 🧠 Load Insights (interviewer-level)
+    - 📊 Exportable reports (CSV/PDF)
+
+> 🛑 **Note**: No scheduling actions from dashboard in MVP.  
+> It is **read-only** and acts as an observability layer.
 
 ---
 
 ## 🔄 Data Sync: Harvest Sync
 
 - Periodically pulls data from:
-  - Calendar
-  - LeavePlanner
-  - MindComputeScheduler
-  - MyMindComputeProfile
+    - Calendar
+    - LeavePlanner
+    - MindComputeScheduler
+    - MyMindComputeProfile
 - Populates MongoDB with:
-  - Interviewer availability
-  - Tech stack capabilities
-  - PTO or leave details
-- No live API reads happen during scheduling
+    - Interviewer availability
+    - Skill matrix and preferences
+    - Time-off and holiday data
+
+> No runtime API calls.  
+> Cache freshness is visible to chatbot/dashboard users.
 
 ---
 
 ## ⚠️ Failure Handling & DLQ
 
-- All async processing (webhooks, Kafka queues) is backed by retries
-- Failures go to DLQ (Dead Letter Queue) for reprocessing
-- Alerting is integrated with Prometheus/Grafana dashboards
-- Examples:
-  - Webhook not received
-  - Interviewer not available
-  - Calendar push fails
-- Notification fallback: recruiter alerted via Chat + email
+- All async processing (e.g., webhooks, Kafka) is backed by retries
+- Failures are routed to **Dead Letter Queues (DLQs)** per topic
+- Alerting is integrated via Prometheus + Grafana
+- Sample failure scenarios:
+    - Webhook missed or malformed
+    - Interviewer not found or double-booked
+    - Calendar push fails
+
+Fallbacks:
+
+- Recruiter alerted via Chatbot + Email
+- DLQ events can be manually replayed if needed
