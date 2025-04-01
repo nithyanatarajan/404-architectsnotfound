@@ -1,0 +1,48 @@
+@startuml
+'Allow class + component + DB + queue mixing
+allowmixing
+
+skinparam componentStyle rectangle
+skinparam defaultTextAlignment center
+skinparam shadowing false
+skinparam linetype ortho
+
+title C4 – [Service Name] Internal Architecture
+
+'Package representing the microservice
+package "[Service Name] (Language: Go/Python)" {
+
+  class Component1 {
+    +publicMethod()
+    -privateLogic()
+  }
+
+  class Component2 {
+    +handleEvent()
+  }
+
+  class ConfigClient {
+    +getConfig()
+  }
+
+  class PersistenceLayer {
+    +writeData()
+    +readData()
+  }
+
+  Component1 --> Component2
+  Component2 --> ConfigClient
+  Component2 --> PersistenceLayer
+}
+
+' 🔄 External Systems
+database "MongoDB" as mongo
+database "Redis Cache" as redis
+queue "Kafka: topic-name" as kafka
+
+' 🔁 External data interactions
+Component2 --> redis : read cache
+PersistenceLayer --> mongo : persist info
+Component1 --> kafka : emit event
+
+@enduml

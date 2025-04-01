@@ -1,0 +1,56 @@
+@startuml
+allowmixing
+
+skinparam componentStyle rectangle
+title C4 – Code Structure for Interview Scheduler (Go)
+
+package "Interview Scheduler (Go Service)" {
+  class SlotSelectionConsumer {
+    +consume(event)
+    +retryOnFailure()
+  }
+
+  class InterviewerSelector {
+    +selectBestInterviewers()
+    -applyScoringRules()
+  }
+
+  class ConfigClient {
+    +getWeights()
+    +getFallbackThreshold()
+  }
+
+  class ScheduleValidator {
+    +checkConflicts()
+    +isSlotValid()
+  }
+
+  class InterviewPersistenceManager {
+    +saveMapping()
+    +updateInterviewStatus()
+  }
+
+  class NotificationDispatcher {
+    +publishStatusEvent()
+    +notifyRecruiter()
+  }
+
+  ' Internal wiring
+  SlotSelectionConsumer --> InterviewerSelector
+  InterviewerSelector --> ConfigClient
+  InterviewerSelector --> ScheduleValidator
+  ScheduleValidator --> InterviewPersistenceManager
+  InterviewPersistenceManager --> NotificationDispatcher
+}
+
+' External systems
+database "MongoDB" as mongo
+database "Redis (Slot Cache)" as redis
+queue "Kafka: interview-status-topic" as kafka
+
+' External data flow
+ScheduleValidator --> mongo : validate slots
+InterviewerSelector --> redis : fetch availability
+NotificationDispatcher --> kafka : publish status
+
+@enduml
