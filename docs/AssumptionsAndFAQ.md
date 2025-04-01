@@ -8,9 +8,8 @@
   new slot.
 - Interviewer **matching is based on skills and preferred interview rounds** by default, as per ArchKata25 scope. Other
   dimensions are supported as a configurable enhancement in our system.
-- Interviewer workload (e.g., interviews per week/month) is **fetched from MindComputeScheduler** (or equivalent) and may be *
-  *further
-  validated/configured** within the system.
+- Interviewer workload (e.g., interviews per week/month) is **fetched from MindComputeScheduler** (or equivalent) and may be
+  **further validated/configured** within the system.
 - **Recruiters can view interviewer workload and schedule history** via the dashboard.
 - Interview slots are shown only if they meet all the following: **skill match, availability, leave status, and within
   workload limits**.
@@ -48,8 +47,9 @@
 
 ### ✅ Decisions
 
-- A **read-through cache** is implemented and treated as the **primary data source** for interviewer information.
-- **All system components** (chatbot, scheduler, dashboard) read from cache only.
+- A **MongoDB-based TTL-backed cache** is implemented and treated as the **primary data source** for interviewer
+  information.
+- **All system components** (chatbot, scheduler, dashboard) read from the cache only.
 - A **background refresh job** fetches from each external system on a configured interval:
     - Calendar: every 30 minutes
     - MyMindComputeProfile / MindComputeScheduler / LeavePlanner: every 24 hours
@@ -65,7 +65,7 @@
 
 ### ❓ Open Questions
 
-- Should recruiters be able to **trigger a manual cache refresh** in edge cases?
+- Should recruiters be able to **trigger a manual cache refresh** in edge cases? (Not supported in MVP)
 - If MindComputeScheduler API access is not granted, what is our **fallback plan** for syncing workload/capacity data?
 
 ## 3. Architecture & Scalability Considerations
@@ -114,7 +114,8 @@
     - Interview declined or fallback used
     - External sync failures (e.g., data not refreshed)
 - **Email is the primary notification channel**, with Messenger used for quicker, conversational alerts.
-- The chatbot and notification systems **do not directly call external APIs** — all reads are via the **central cache**.
+- The chatbot and notification systems **do not directly call external APIs** — all reads are via the **central MongoDB
+  cache**.
 
 ### ✅ Decisions
 
@@ -151,8 +152,7 @@
     - Rescheduling frequency and reasons
 - Reports are intended **only for recruitment personnel**, not accessible to others.
     - Within the recruitment org, access to reports is **governed via RBAC**, which reflects the organizational
-      hierarchy (
-      e.g., global, region, country, recruiter-level).
+      hierarchy (e.g., global, region, country, recruiter-level).
 - Reports do not need to support live actions (e.g., "reschedule from here"), but the system is designed to allow such
   extensions.
 - There are no explicit **compliance/legal data retention constraints** defined in ArchKata25 — can be assumed as
@@ -166,8 +166,7 @@
     - Decline reasons and fallback frequency
     - Reschedule volume over time
 - Reports are accessible via the **recruiter dashboard** and exportable as CSV/PDF.
-- A **reporting database** is maintained separately (e.g., PostgreSQL or OLAP-friendly DB), optimized for aggregation
-  and trend queries.
+- A **reporting database** is planned as a **post-MVP enhancement**, optimized for aggregation and trend queries.
 - Metrics are generated from **event streams** (e.g., interview-scheduled, rescheduled) and stored in a **central
   reporting sink**.
 - **SLA-based alerts** are triggered for violations (e.g., no feedback after 24h, failed calendar sync).

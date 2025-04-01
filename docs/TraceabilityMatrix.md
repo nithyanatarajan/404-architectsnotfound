@@ -25,7 +25,7 @@ design decisions, artifacts, and solution components in RecruitX.
 | RBAC enforcement                           | `TechStack.md`, `UserJourneys.md`, `Microservices.md`                           | Controls access to dashboard, DLQs, reports                          |
 | Compliance & PII handling                  | `Security.md`, `Characteristics.md`                                             | PII encrypted, access logged, all data scoped to MindCompute            |
 | Multi-tenancy support                      | `ArchitectureStyle.md`, `AssumptionsAndFAQ.md`                                  | Not supported – single-tenant only                                   |
-| Cache-first read architecture              | `Characteristics.md`, `Tradeoffs.md`, `DeploymentStrategy.md`                   | Redis = live reads; Mongo = sync layer from external systems         |
+| Cache-first read architecture              | `Characteristics.md`, `Tradeoffs.md`, `DeploymentStrategy.md`                   | MongoDB = cache with TTL; used as source for reads                   |
 | MongoDB as sync-layer cache                | `TechStack.md`, `Microservices.md`                                              | Durable store for MyMindComputeProfile, Calendar, MindComputeScheduler data via `harvest-sync` |
 | Messenger Notifier integration                 | `UserJourneys.md`, `Microservices.md`, `Diagrams.md`                            | Separate notifier pushes alerts via Messenger to recruiters        |
 | DLQ visibility via dashboard               | `Microservices.md`, `TechStack.md`, `UserJourneys.md`                           | Viewable via dashboard; replayable with RBAC control                 |

@@ -13,21 +13,24 @@ RecruitX Next is designed to run on any CNCF-compliant Kubernetes cluster using 
 - ✅ All provisioning and releases are **declarative**
 - ✅ Easily portable between cloud, on-prem, and local setups
 
+> ℹ️ **Note**: If deployed using MindCompute’s internal platform (NEO), some infra and release tools may be replaced with
+> approved equivalents. All infra logic is modular and swappable.
+
 ---
 
 ## 🧰 Tooling Stack
 
-| Layer              | Tool                   | Purpose                                |
-|--------------------|------------------------|----------------------------------------|
-| Infrastructure     | Terraform              | Cloud-agnostic infra provisioning      |
-| Container Runtime  | Docker                 | Packaging microservices                |
-| Orchestration      | Kubernetes             | Core runtime environment               |
-| Local Dev          | k3s                    | Lightweight K8s cluster for developers |
-| Package Mgmt       | Helm                   | Templated deployments                  |
-| GitOps Engine      | ArgoCD                 | Automated and secure release delivery  |
-| Service Mesh       | Consul + Envoy         | Sidecar-based discovery, mTLS, retries |
-| Secrets Management | Vault                  | Encrypted credentials, API tokens      |
-| CI / Scan / Secure | GitHub Actions + Trivy | CI pipelines, shift-left security      |
+| Layer              | Tool                   | Purpose                                               |
+|--------------------|------------------------|-------------------------------------------------------|
+| Infrastructure     | Terraform              | Cloud-agnostic infra provisioning                     |
+| Container Runtime  | Docker                 | Packaging microservices                               |
+| Orchestration      | Kubernetes             | Core runtime environment                              |
+| Local Dev          | k3s                    | Lightweight K8s cluster for developers                |
+| Package Mgmt       | Helm                   | Templated deployments                                 |
+| GitOps Engine      | ArgoCD                 | Automated and secure release delivery                 |
+| Service Mesh       | Consul + Envoy         | Sidecar-based discovery, mTLS, retries                |
+| Secrets Management | Vault                  | Encrypted credentials, API tokens                     |
+| CI / Scan / Secure | GitHub Actions + Trivy | CI pipelines, shift-left security (image scans, etc.) |
 
 ---
 
@@ -44,11 +47,12 @@ RecruitX Next is designed to run on any CNCF-compliant Kubernetes cluster using 
 
 ## 🔐 Security-by-Design
 
-- All APIs are fronted by **Kong Gateway** with OIDC-based AuthN
-- Fine-grained access via **OPA** (RBAC)
-- **mTLS** enabled by Consul + Envoy
-- Secrets injected securely via **Vault**
-- **Trivy** scans baked into CI for container hardening
+- All services are deployed within a **secure internal mesh**
+- **OIDC via Okta** is used for service and user identity
+- **OPA** policies enforce role-based access at service and API layer
+- **mTLS** between services via Consul + Envoy sidecars
+- **Vault** handles secrets, access tokens, and sensitive configs
+- **Trivy** baked into CI to block vulnerable images pre-deploy
 
 ---
 
@@ -67,9 +71,10 @@ All components are pre-wired via Helm/ArgoCD for unified monitoring.
 
 - GitOps-first for all cluster changes
 - Helm-based config versioning
-- Service-to-service mTLS
-- Stateless service design where possible
+- Service-to-service mTLS inside internal mesh
+- Stateless service design where applicable
 - Feature flags + config rules externalized to `config-service`
+- MongoDB with TTL used for cache, reducing runtime API fetches
 
 ---
 

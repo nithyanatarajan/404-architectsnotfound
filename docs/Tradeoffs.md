@@ -37,24 +37,24 @@ operations.
 
 ---
 
-## 🧭 Redis + Mongo for Fast Slot Discovery
+## 🧭 MongoDB as Durable Cache with TTL
 
-**Decision**: Use Redis for real-time slot lookups and Mongo for preloaded data.
+**Decision**: Use MongoDB with TTL indexing for slot availability and interviewer profile caching.
 
 - ✅ Pros:
-    - Fast response time
-    - Simplified data access layer
+    - TTL allows controlled data expiry without Redis
+    - Mongo serves both cache and config needs
 - ⚠️ Cons:
-    - Potential data staleness
+    - Slightly higher read latency than Redis in high-throughput scenarios
 - 📌 Mitigation:
-    - `harvest-sync` refreshes data on a configured schedule
-    - Scheduler performs final validation
+    - TTL indexing keeps cache fresh
+    - Harvest-sync jobs run on defined intervals (30min/24hr split)
 
 ---
 
 ## 🔐 Security Layers
 
-**Decision**: Use Kong Gateway + OIDC + OPA + Vault for end-to-end auth and access control.
+**Decision**: Use OIDC + OPA + Vault for authentication, authorization, and secrets.
 
 - ✅ Pros:
     - Centralized control of access and policies
@@ -100,4 +100,3 @@ operations.
 
 All major decisions were made with resilience, clarity, and extensibility in mind. Where tradeoffs were needed, fallback
 paths, retries, or tooling were introduced to mitigate risks.
-

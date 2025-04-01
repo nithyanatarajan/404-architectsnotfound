@@ -19,7 +19,7 @@ configurability goals, and runtime resilience.
 - Kafka-based DLQs isolate failures and allow safe reprocessing
 - Retries with exponential backoff via `tenacity` (Python) and Go context patterns
 - Circuit breaker prevents repeated downstream hits
-- Fallback to cached data ensures degraded-but-consistent operation
+- Fallback to cached data ensures degraded-but-consistent operation (MongoDB TTL cache)
 - Alerts sent to recruiters when failures affect freshness or slot computation
 
 ---
@@ -54,7 +54,7 @@ configurability goals, and runtime resilience.
 - All user data is classified as **PII**
 - OAuth2.0 + SSO with OIDC
 - RBAC enforced via OPA
-- mTLS and Vault for secure comms and secrets
+- mTLS and Vault (or internal secret manager) for secure comms and secrets
 
 ---
 
@@ -62,8 +62,8 @@ configurability goals, and runtime resilience.
 
 **Definition**: Remain responsive despite failures or spikes.
 
-- Redis + fallback cache ensures read availability even during upstream downtime
-- All reads use cache; API hits are only made during background refresh
+- MongoDB with TTL-based cache ensures read availability even during upstream downtime
+- All reads use the local cache; API hits are performed only during background refresh jobs
 - Kubernetes probes and horizontal autoscaling ensure HA behavior
 
 ---
@@ -72,7 +72,7 @@ configurability goals, and runtime resilience.
 
 **Definition**: System can increase throughput and responsiveness as load grows.
 
-- Redis used for fast reads; refresh jobs for writes
+- MongoDB handles high-volume cache reads efficiently
 - Services are stateless and K8s-native with autoscaling
 - DLQs and circuit breakers prevent cascading failures
 
@@ -92,9 +92,9 @@ configurability goals, and runtime resilience.
 
 **Definition**: Plug in future functionality with minimal change.
 
-- Support for new ATS or calendar APIs via Kong + adapters
+- Support for new ATS or calendar APIs via adapters
 - AI/LLM-based components (e.g., chatbot, reports) are loosely coupled and pluggable
-- Gemini is used where org-approved; Ollama is supported for local testing
+- LLM provider (e.g., Gemini, Ollama) is configurable based on org preference
 
 ---
 
@@ -102,10 +102,10 @@ configurability goals, and runtime resilience.
 
 **Definition**: Ensures systems can communicate consistently through open protocols and shared infrastructure.
 
-- Unified interaction via Kong Gateway
 - REST/gRPC standardization between internal services
 - Kafka for async flows across systems
-- Redis-backed cache reads + sync-based writes ensure separation of concern
+- MongoDB (cache) separates fetch logic from compute paths
+- All services operate inside a secure, authenticated internal mesh
 
 ---
 
@@ -113,9 +113,9 @@ configurability goals, and runtime resilience.
 
 **Definition**: Low latency and fast response times.
 
-- Redis used for sub-second slot lookups
-- MongoDB used as pre-populated cache for larger query datasets
-- Avoids live queries to external APIs during runtime
+- MongoDB TTL cache used for near-real-time slot lookups
+- Background sync avoids blocking user flows with external calls
+- Optimized read-write separation for scheduling and matching logic
 
 ---
 
