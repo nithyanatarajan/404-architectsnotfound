@@ -1,35 +1,38 @@
 @startuml
-skinparam defaultTextAlignment center
-skinparam componentStyle rectangle
-title RecruitX Next – C1 System Context Diagram
+!include <C4/C4_Context>
 
-actor "Recruiter" as recruiter
-actor "Candidate" as candidate
-actor "Interviewer" as interviewer
+TITLE RecruitX Next -  C1 System Context Diagram
 
-node "RecruitX Platform" as recruitx <<Software System>> {
-  rectangle "RecruitX Platform\nRecruitment platform to\nmatch, schedule, notify,\nand track interviews" as main
-}
+Person(recruiter, "Recruiter", "Manages candidate interviews and scheduling")
+Person(candidate, "Candidate", "Applies for positions and selects interview slots")
+Person(interviewer, "Interviewer", "Conducts interviews with candidates")
 
-' External systems
-node "InterviewLogger" as interviewLogger <<Software System>>
-node "MindComputeScheduler" as mindComputeScheduler <<Software System>>
-node "MyMindComputeProfile" as myMindComputeProfile <<Software System>>
-node "LeavePlanner" as leave <<Software System>>
-node "Calendar" as calendar <<Software System>>
-node "Messenger" as chat <<Software System>>
+System(recruitXSystem, "RecruitX Next", "Recruitment and interview scheduling platform that manages the entire interview lifecycle from candidate application to interview completion")
 
-' Interactions
-recruiter --> main : Schedules interviews\nViews reports, uses chatbot
-recruiter <-- main : Receives updates,\nnotifications
-candidate --> main : Selects interview slot
-interviewer --> main : Responds via\ncalendar/chat
+System_Ext(interviewLogger, "InterviewLogger", "Applicant Tracking System")
+System_Ext(myMindComputeProfile, "MyMindComputeProfile", "Skills and technical assessment")
+System_Ext(leavePlanner, "LeavePlanner", "Employee leave management")
+System_Ext(calendar, "Calendar", "Calendar service for scheduling")
+System_Ext(mindComputeScheduler, "MindComputeScheduler", "Interview scheduling platform")
+System_Ext(Messenger, "Messenger", "Communication platform")
 
-main --> mindComputeScheduler : Selects slot\nReceives callback
-main --> interviewLogger : Updates candidate\nstatus + feedback
-main --> myMindComputeProfile : Fetches interviewer\nprofiles
-main --> leave : Fetches leave data
-main --> chat : Sends chat messages,\nreceives chatbot queries
-main --> calendar : Sends invites,\nreceives RSVP updates
+Rel(recruiter, recruitXSystem, "Uploads resumes, configures interviews, views status, uses chatbot")
+Rel(candidate, recruitXSystem, "Selects available interview slots")
+Rel(interviewer, recruitXSystem, "Receives interview notifications, provides availability")
 
+Rel(recruitXSystem, interviewLogger, "Integrates with for candidate data")
+Rel(interviewLogger, recruitXSystem, "Sends webhooks on candidate updates")
+
+Rel(recruitXSystem, myMindComputeProfile, "Fetches technical skills data")
+Rel(recruitXSystem, leavePlanner, "Checks employee availability")
+Rel(recruitXSystem, calendar, "Schedules interviews and checks availability")
+
+Rel(recruitXSystem, mindComputeScheduler, "Sends available slots to candidates")
+Rel(mindComputeScheduler, recruitXSystem, "Notifies of candidate slot selection")
+
+Rel(recruitXSystem, Messenger, "Sends notifications to recruiters and interviewers")
+
+UpdateRelStyle(candidate, recruitXSystem, $textColor="blue", $lineColor="blue")
+UpdateRelStyle(recruiter, recruitXSystem, $textColor="red", $lineColor="red")
+UpdateRelStyle(interviewer, recruitXSystem, $textColor="green", $lineColor="green")
 @enduml
