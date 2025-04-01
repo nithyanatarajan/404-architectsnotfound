@@ -1,6 +1,7 @@
-# ADR-002: 004 Quality Tradeoffs
+# ADR-004: Quality Attribute Tradeoffs
 
 ## Status
+
 Accepted
 
 ## Context
@@ -9,8 +10,6 @@ The RecruitX system needs to balance multiple quality attributes such as availab
 consistency, and extensibility — all within the constraints of rapid development and integration with multiple
 third-party systems (e.g., Calendar, MyMindComputeProfile, MindComputeScheduler). Given that real-time access to external systems cannot
 always be guaranteed, certain tradeoffs were made to preserve user experience and platform reliability.
-
-
 
 ## Decision
 
@@ -26,27 +25,12 @@ always be guaranteed, certain tradeoffs were made to preserve user experience an
 | **Security**      | All data, including PII, is encrypted at rest and in transit. Access to sensitive features like DLQ inspection is governed via RBAC.                                                        |
 | **Scalability**   | Services are stateless, horizontally scalable, and deployed on Kubernetes with support for autoscaling and service discovery. The system is designed to handle 3–5x of expected daily load. |
 
-
-- Predictable and fast UX for recruiters
-- Resilience to third-party API issues
-- Operational simplicity and early integration velocity
-- Extensibility via configuration
-- Platform-level observability for future AI enhancements
-
-## Related Docs
-
-- [`Characteristics.md`](../Characteristics.md)
-- [`Tradeoffs.md`](../Tradeoffs.md)
-
-
 ## Consequences
 
 - Some responses (e.g., available interviewers) may use stale data during API outages or sync delays.
 - Manual replay of DLQ events may be necessary in cases of permanent message failure.
 - Developers and operators need observability tooling to monitor cache freshness, retry attempts, and fallback usage.
 - Certain edge cases (e.g., interview slot changes after sync window) may require recruiter intervention.
-
-
 
 ## Alternatives Considered
 
@@ -59,10 +43,15 @@ always be guaranteed, certain tradeoffs were made to preserve user experience an
 - **Eventual consistency with stale warnings only**  
   ✔ Incorporated via cache timestamp display and recruiter alerts, but not as the only strategy.
 
+## Decision Drivers
 
-
-- Option 1: ...
-- Option 2: ...
+- Predictable and fast UX for recruiters
+- Resilience to third-party API issues
+- Operational simplicity and early integration velocity
+- Extensibility via configuration
+- Platform-level observability for future AI enhancements
 
 ## Related Docs
-- TODO: Link to related ADRs or architectural docs
+
+- [`Characteristics.md`](../Characteristics.md)
+- [`Tradeoffs.md`](../Tradeoffs.md)

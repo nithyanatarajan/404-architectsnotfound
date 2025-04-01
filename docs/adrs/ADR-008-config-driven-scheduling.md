@@ -1,14 +1,13 @@
-# ADR-006: 008 Config Driven Scheduling
+# ADR-005: Config-Driven Scheduling Logic
 
 ## Status
+
 Accepted
 
 ## Context
 
 Scheduling behavior varies by team, role, and region. Hardcoding rules would restrict flexibility and make the system
 brittle.
-
-
 
 ## Decision
 
@@ -18,15 +17,11 @@ We introduced a **config-service** to centralize runtime rules for:
 - Adjusting scoring dynamically
 - Future feature flags or A/B variants
 
-
-
 ## Consequences
 
 - ✅ Fine-tuned logic without code changes
 - ✅ Experimentation and override support
 - ⚠️ Config versioning and validation becomes critical
-
-
 
 ## Alternatives Considered
 
@@ -36,10 +31,3 @@ We introduced a **config-service** to centralize runtime rules for:
 ## Related Docs
 
 - [`Microservices.md`](../Microservices.md)
-
-
-- Option 1: ...
-- Option 2: ...
-
-## Related Docs
-- TODO: Link to related ADRs or architectural docs
