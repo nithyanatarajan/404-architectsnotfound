@@ -30,8 +30,8 @@ scalable, cache-first interview scheduling system submitted for ArchKata 2025.
 
 ## ✨ Solution Highlights
 
-- 🔁 **Cache-as-Primary Reads**: Cache powers all live reads; external data sync is background-only
-- 💬 **Multichannel Interface**: Recruiters interact via Web UI and Chatbot
+- 🔁 **Cache-as-Primary Reads**: All reads powered by MongoDB TTL-backed cache; external data sync is background-only
+- 💬 **Multichannel Interface**: Recruiters interact via a read-only dashboard and interactive Messenger chatbot
 - ⚡ **DLQ + Alerting Built-In**: Resilient retries and manual fallback for all critical paths
 - 🧠 **LLM-Enhanced**: NLP/LLM augment chatbot and reporting — provider-agnostic and pluggable
 - 🛡️ **Secure by Design**: OIDC + OPA + Vault + mTLS across mesh-enabled services
@@ -44,7 +44,7 @@ scalable, cache-first interview scheduling system submitted for ArchKata 2025.
 - **Key Characteristics**: Resilient, Observable, Configurable, AI-augmented
 - **Deployment**: GitOps-first, Kubernetes-native, Cloud-agnostic
 - **Security**: OIDC + OPA + mTLS + Vault
-- **Tech Stack**: Go, Python, Kafka, Redis, Mongo, Flutter, Gemini/Ollama, ArgoCD, Consul
+- **Tech Stack**: Go, Python, Kafka, MongoDB, Flutter, Gemini/Ollama, ArgoCD, Consul
 
 ---
 
@@ -111,53 +111,28 @@ Refer to [`TraceabilityMatrix.md`](./docs/TraceabilityMatrix.md) for complete ma
 | ADR-010 | [ADR-010-gitops-argocd.md](./docs/adrs/ADR-010-gitops-argocd.md)                         | GitOps with ArgoCD                         |
 | ADR-011 | [ADR-011-shift-left-security.md](./docs/adrs/ADR-011-shift-left-security.md)             | Shift-Left Security                        |
 | ADR-012 | [ADR-012-nlp-chatbot.md](./docs/adrs/ADR-012-nlp-chatbot.md)                             | NLP Chatbot Capabilities                   |
-| ADR-013 | [ADR-013-manual-fallback.md](./docs/adrs/ADR-013-manual-fallback.md)                     | Manual Dashboard Fallbacks                 |
-
----
-
-## 🧠 How It All Works (Narrative)
-
-> For detailed journey, refer [`UserJourneys.md`](./docs/UserJourneys.md).
-
-RecruitX Next follows a streamlined, resilient architecture for interview scheduling.
-
-- A recruiter initiates scheduling via the dashboard or chatbot.
-- The system fetches all relevant data (interviewer availability, preferences, PTO, load) from **Redis**, which acts as
-  the single source of information for the system.
-- This data is periodically synced via a background job (`harvest-sync`) from external systems like Calendar,
-  MindComputeScheduler, and LeavePlanner.
-- The **slot-seeker** computes valid time slots, and the **scheduler** selects the best-fit interviewer using scoring
-  rules.
-- Candidates receive invite links and can confirm slots — triggering event updates and notifications.
-- Alerts and updates are pushed via **Messenger Notifier** and emails.
-- **All reads are cache-first**; no live API calls are made during interactive flows.
-- **Kafka handles event-driven workflows**, with DLQs ensuring message reliability and traceability.
-- If anything fails (e.g., sync job, webhook), alerts are raised and fallback mechanisms ensure continuity.
-- AI/LLM components enhance both chatbot responses and analytics reporting — without being hardwired to a specific
-  provider.
-
-The architecture is designed to be:
-
-- Observable by default
-- Resilient to failures
-- Secure by design
-- Modular and pluggable
-- Friendly for both humans and automation
+| ADR-013 | [ADR-013-manual-fallback.md](./docs/adrs/ADR-013-manual-fallback.md)                     | Manual Fallback via Dashboard & Chatbot    |
 
 ---
 
 ## ⚠️ Known Limitations
 
-- **MindComputeScheduler API Assumed**: API availability is assumed for fetching interviewer preferences; no official integration
-  verified.
-- **No Real-Time External Queries**: System is cache-first by design; real-time sync is deferred to background jobs,
-  which may lead to temporary staleness.
-- **LLM Provider Flexibility, but Untested**: While the AI layer is pluggable, company-specific
-  model performance hasn’t been benchmarked.
-- **Manual Feedback Still Required**: Feedback collection remains a manual step; nudges are sent, but the loop is not
-  fully automated.
-- **Fallback UI is Passive**: Manual override flows exist but require user action; no auto-escalation or smart retry.
-- **Multi-Tenancy Out of Scope**: System is designed for single-tenant operation (MindCompute only).
+- **MindComputeScheduler API Assumed**: Integration assumes APIs are available for interviewer preferences and load; no formal
+  contract or validation confirmed.
+- **Dashboard is Read-Only**: The UI currently supports reporting and monitoring only. Interview scheduling actions are
+  not available via dashboard in the MVP.
+- **Cache-First with Deferred Sync**: All reads are served from MongoDB-based cache; external systems are polled
+  periodically, which may result in temporary staleness.
+- **LLM Provider Not Benchmarked**: While LLM usage is pluggable (e.g., Gemini, Ollama), no provider-specific
+  benchmarking has been conducted.
+- **Manual Feedback Collection**: Feedback nudges are supported, but actual submission remains a manual, non-automated
+  process.
+- **No Smart Retry or Auto-Escalation**: Fallback UI exists, but recruiters must take action; the system does not
+  escalate or retry automatically.
+- **Manual Fallback via Chatbot Only**: Override or recovery actions (e.g., reschedule, retry) are handled via chatbot —
+  not through the dashboard.
+- **Single-Tenant by Design**: Multi-tenant support is out of scope for this release; RecruitX Next is scoped for
+  MindCompute only.
 
 ---
 
@@ -181,9 +156,14 @@ The architecture is designed to be:
 🚀 RecruitX Next is built to scale, recover, adapt, and empower — designed for real-world interview coordination at
 scale.
 
-It embraces event-driven principles, secure API access, cache-first reads, observable workflows, and fallback-driven
-resilience — all while enabling AI-augmented decision-making through chatbot and reporting tools.
+It embraces:
 
+- Event-driven microservices
+- Secure API access
+- Cache-first reads
+- AI-augmented insights
+- Observable mesh-based architecture
+- Fallback-driven resilience
 
 > This repository is our ArchKata 25 response. All docs and decisions reflect architectural thinking, not
 > implementation.
