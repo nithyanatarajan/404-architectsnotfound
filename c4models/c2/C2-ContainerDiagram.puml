@@ -1,0 +1,73 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam defaultTextAlignment center
+title RecruitX Next – C2 Container Diagram (Final Polished)
+
+' === UI & Interface Layer ===
+actor Recruiter
+actor Candidate
+actor Interviewer
+
+component "Dashboard UI" as dashboard <<Flutter>>
+component "Chatbot Interface" as chatbot <<Messenger Bot>>
+component "Chatbot Interpreter" as chatbot_interpreter <<LangChain + LLM>>
+component "InterviewLogger Wrapper" as interviewLogger_wrapper <<API/Webhook>>
+
+' === Microservices ===
+component "Candidate Service" as candidate_service <<Microservice>>
+component "Slot Seeker" as slot_seeker <<Microservice>>
+component "Interview Scheduler" as interview_scheduler <<Microservice>>
+component "Notifier Service" as notifier_service <<Microservice>>
+component "Harvest Sync" as harvest_sync <<Scheduler>>
+component "Config Service" as config_service <<Microservice>>
+
+' === External Systems ===
+node "InterviewLogger" as interviewLogger <<ATS>>
+node "MindComputeScheduler" as mindComputeScheduler <<Preferences>>
+node "MyMindComputeProfile" as myMindComputeProfile <<Skill & Profile DB>>
+node "LeavePlanner" as leave_planner <<PTO Manager>>
+node "Calendar" as calendar <<Calendar System>>
+node "Messenger" as messenger <<Messaging Platform>>
+
+' === Platform & Infra ===
+database "MongoDB" as mongo <<NoSQL DB>>
+database "Redis" as redis <<In-memory Cache>>
+queue "Kafka" as kafka <<Message Queue>>
+queue "DLQ" as dlq <<Kafka DLQ>>
+
+' === Interaction Flows ===
+
+Recruiter --> dashboard : View & Schedule
+Recruiter --> chatbot : Query via Chat
+chatbot --> chatbot_interpreter : Forward NLP Input
+chatbot_interpreter --> interview_scheduler : Trigger Scheduling
+
+dashboard --> candidate_service : API Call (Schedule)
+candidate_service --> slot_seeker : Request Slots
+slot_seeker --> redis : «cache-read» availability
+slot_seeker --> kafka : Publish slot events
+
+harvest_sync --> mongo : Sync external data
+harvest_sync --> redis : Refresh cache
+harvest_sync --> kafka : Publish sync events
+
+candidate_service --> interview_scheduler : Forward selection
+interview_scheduler --> config_service : Get rules
+interview_scheduler --> redis : «cache-read» interviewer availability
+interview_scheduler --> mongo : Store schedule
+
+interview_scheduler --> notifier_service : Notify
+notifier_service --> calendar : Create event
+notifier_service --> kafka : Publish interview status
+notifier_service --> messenger : Notify recruiter
+
+interviewLogger_wrapper --> candidate_service : Webhook Trigger
+interviewLogger_wrapper --> interviewLogger : Update status
+
+interviewer --> calendar : RSVP
+candidate --> candidate_service : Select slot
+
+kafka --> interviewLogger : Status updates
+kafka --> dlq : On failure
+
+@enduml

@@ -1,0 +1,35 @@
+@startuml
+skinparam defaultTextAlignment center
+skinparam componentStyle rectangle
+title RecruitX Next – C1 System Context Diagram
+
+actor "Recruiter" as recruiter
+actor "Candidate" as candidate
+actor "Interviewer" as interviewer
+
+node "RecruitX Platform" as recruitx <<Software System>> {
+  rectangle "RecruitX Platform\nRecruitment platform to\nmatch, schedule, notify,\nand track interviews" as main
+}
+
+' External systems
+node "InterviewLogger" as interviewLogger <<Software System>>
+node "MindComputeScheduler" as mindComputeScheduler <<Software System>>
+node "MyMindComputeProfile" as myMindComputeProfile <<Software System>>
+node "LeavePlanner" as leave <<Software System>>
+node "Calendar" as calendar <<Software System>>
+node "Messenger" as chat <<Software System>>
+
+' Interactions
+recruiter --> main : Schedules interviews\nViews reports, uses chatbot
+recruiter <-- main : Receives updates,\nnotifications
+candidate --> main : Selects interview slot
+interviewer --> main : Responds via\ncalendar/chat
+
+main --> mindComputeScheduler : Selects slot\nReceives callback
+main --> interviewLogger : Updates candidate\nstatus + feedback
+main --> myMindComputeProfile : Fetches interviewer\nprofiles
+main --> leave : Fetches leave data
+main --> chat : Sends chat messages,\nreceives chatbot queries
+main --> calendar : Sends invites,\nreceives RSVP updates
+
+@enduml

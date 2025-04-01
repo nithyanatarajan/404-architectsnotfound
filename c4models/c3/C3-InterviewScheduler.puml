@@ -1,0 +1,50 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam defaultTextAlignment center
+title RecruitX Next – C3 Component Diagram (Interview Scheduler)
+
+actor "Kafka: interview-schedule-queue" as kafka_input
+actor "Kafka DLQ" as dlq
+database "MongoDB" as mongo
+component "Config Service" as config_service <<Microservice>>
+component "InterviewLogger" as interviewLogger <<External System>>
+queue "Kafka: interview-status-topic" as kafka_status
+
+package "Interview Scheduler <<Microservice>>" {
+  component "SlotSelectionConsumer" <<Component>>
+  component "InterviewerSelector" <<Component>>
+  component "ScheduleValidator" <<Component>>
+  component "InterviewPersistenceManager" <<Component>>
+  component "NotificationDispatcher" <<Component>>
+}
+
+' === Flow ===
+kafka_input --> SlotSelectionConsumer : async event
+
+SlotSelectionConsumer --> InterviewerSelector
+InterviewerSelector --> config_service : scoring rules
+
+InterviewerSelector --> ScheduleValidator
+ScheduleValidator --> mongo : fetch slot/interviewer state
+
+ScheduleValidator --> InterviewPersistenceManager
+InterviewPersistenceManager --> NotificationDispatcher
+NotificationDispatcher --> kafka_status : interview status
+
+kafka_status --> interviewLogger : notify status change
+
+' === Resilience ===
+SlotSelectionConsumer --> dlq : on failure (e.g., invalid event)
+ScheduleValidator --> dlq : if 3 retries fail (configurable)
+
+note right of SlotSelectionConsumer
+  Triggered asynchronously via Kafka
+  Retry with backoff (3x max)
+end note
+
+note bottom of mongo
+  Used to validate existing schedules
+  and ensure no double-booking
+end note
+
+@enduml
