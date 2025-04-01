@@ -1,73 +1,85 @@
 @startuml
-skinparam componentStyle rectangle
-skinparam defaultTextAlignment center
-title RecruitX Next – C2 Container Diagram (Final Polished)
+!define PERSON actor
+!define SYSTEM_BOUNDARY rectangle
+!define CONTAINER rectangle
+!define EXTERNAL_SYSTEM rectangle
+!define DATABASE database
 
-' === UI & Interface Layer ===
-actor Recruiter
-actor Candidate
-actor Interviewer
+' People
+PERSON "Recruiter" as recruiter
+PERSON "Candidate" as candidate
+PERSON "Interviewer" as interviewer
 
-component "Dashboard UI" as dashboard <<Flutter>>
-component "Chatbot Interface" as chatbot <<Messenger Bot>>
-component "Chatbot Interpreter" as chatbot_interpreter <<LangChain + LLM>>
-component "InterviewLogger Wrapper" as interviewLogger_wrapper <<API/Webhook>>
+' External Systems
+EXTERNAL_SYSTEM "InterviewLogger\n==\nApplicant Tracking System" as interviewLogger
+EXTERNAL_SYSTEM "MyMindComputeProfile\n==\nTechnical Assessment" as myMindComputeProfile
+EXTERNAL_SYSTEM "LeavePlanner" as leavePlanner
+EXTERNAL_SYSTEM "Calendar" as calendar
+EXTERNAL_SYSTEM "MindComputeScheduler" as mindComputeScheduler
+EXTERNAL_SYSTEM "Messenger" as Messenger
 
-' === Microservices ===
-component "Candidate Service" as candidate_service <<Microservice>>
-component "Slot Seeker" as slot_seeker <<Microservice>>
-component "Interview Scheduler" as interview_scheduler <<Microservice>>
-component "Notifier Service" as notifier_service <<Microservice>>
-component "Harvest Sync" as harvest_sync <<Scheduler>>
-component "Config Service" as config_service <<Microservice>>
+' System Boundary
+SYSTEM_BOUNDARY "RecruitX Next System" as recruitXSystem {
+  ' Microservices (Containers)
+  CONTAINER "interviewLogger-wrapper\n==\nInterface layer between\nInterviewLogger and internal services" as interviewLoggerWrapper
+  
+  CONTAINER "candidate-service\n==\nManages candidate interview\nrequest lifecycle" as candidateService
+  
+  CONTAINER "slot-seeker\n==\nComputes matching slots\nfrom available data" as slotSeeker
+  
+  CONTAINER "interview-scheduler\n==\nFinalizes slot assignment and\ngenerates interviewer invites" as interviewScheduler
+  
+  CONTAINER "notifier-service\n==\nSends notifications to\ninterviewers/recruiters" as notifierService
+  
+  CONTAINER "chatbot\n==\nNLP-powered interface for recruiters" as chatbot
+  
+  CONTAINER "chatbot-interpreter\n==\nProcesses NLP queries" as chatbotInterpreter
+  
+  CONTAINER "dashboard-service\n==\nProvides UI-backed reports\nand insights" as dashboardService
+  
+  CONTAINER "harvest-sync\n==\nPeriodically fetches data\nfrom external systems" as harvestSync
+  
+  CONTAINER "config-service\n==\nStores tunable weights,\nround logic, rule configs" as configService
+  
+  ' Databases
+  DATABASE "MongoDB\n==\nDurable sync cache + configs" as mongodb
+  DATABASE "Interview Queue\n==\n(Kafka)" as interviewQueue
+}
 
-' === External Systems ===
-node "InterviewLogger" as interviewLogger <<ATS>>
-node "MindComputeScheduler" as mindComputeScheduler <<Preferences>>
-node "MyMindComputeProfile" as myMindComputeProfile <<Skill & Profile DB>>
-node "LeavePlanner" as leave_planner <<PTO Manager>>
-node "Calendar" as calendar <<Calendar System>>
-node "Messenger" as messenger <<Messaging Platform>>
+' External connections
+recruiter -down-> chatbot : "Uses"
+recruiter -down-> dashboardService : "Views reports"
+candidate -down-> mindComputeScheduler : "Selects slots"
+interviewLoggerWrapper -right-> interviewLogger : "Receives webhooks,\nupdates schedule"
 
-' === Platform & Infra ===
-database "MongoDB" as mongo <<NoSQL DB>>
-database "Redis" as redis <<In-memory Cache>>
-queue "Kafka" as kafka <<Message Queue>>
-queue "DLQ" as dlq <<Kafka DLQ>>
+' Connection to external systems
+harvestSync -up-> myMindComputeProfile : "Fetches data"
+harvestSync -up-> leavePlanner : "Fetches data"
+harvestSync -up-> calendar : "Fetches data"
+harvestSync -up-> mindComputeScheduler : "Fetches data"
+notifierService -up-> Messenger : "Sends notifications"
+notifierService -up-> calendar : "Schedules interviews"
 
-' === Interaction Flows ===
+' Internal connections
+interviewLoggerWrapper -down-> candidateService : "Webhooks for candidate updates"
+candidateService -right-> slotSeeker : "Queries for available slots"
+candidateService -right-> mindComputeScheduler : "Forwards slot list"
+mindComputeScheduler -left-> candidateService : "Selected slot webhook"
+candidateService -down-> interviewScheduler : "Forwards selected slot"
 
-Recruiter --> dashboard : View & Schedule
-Recruiter --> chatbot : Query via Chat
-chatbot --> chatbot_interpreter : Forward NLP Input
-chatbot_interpreter --> interview_scheduler : Trigger Scheduling
+slotSeeker -up-> harvestSync : "Gets availability data"
+slotSeeker -down-> configService : "Gets configuration"
+slotSeeker <-left- interviewScheduler : "Gets scheduled slots"
 
-dashboard --> candidate_service : API Call (Schedule)
-candidate_service --> slot_seeker : Request Slots
-slot_seeker --> redis : «cache-read» availability
-slot_seeker --> kafka : Publish slot events
+interviewScheduler -down-> interviewQueue : "Publishes scheduled interviews"
+notifierService -up-> interviewQueue : "Consumes scheduled interviews"
 
-harvest_sync --> mongo : Sync external data
-harvest_sync --> redis : Refresh cache
-harvest_sync --> kafka : Publish sync events
+chatbot -right-> chatbotInterpreter : "Processes NLP queries"
+chatbotInterpreter -down-> slotSeeker : "Queries slots"
+chatbotInterpreter -down-> interviewScheduler : "Triggers scheduling"
 
-candidate_service --> interview_scheduler : Forward selection
-interview_scheduler --> config_service : Get rules
-interview_scheduler --> redis : «cache-read» interviewer availability
-interview_scheduler --> mongo : Store schedule
+dashboardService -right-> interviewLoggerWrapper : "Gets candidate data"
 
-interview_scheduler --> notifier_service : Notify
-notifier_service --> calendar : Create event
-notifier_service --> kafka : Publish interview status
-notifier_service --> messenger : Notify recruiter
-
-interviewLogger_wrapper --> candidate_service : Webhook Trigger
-interviewLogger_wrapper --> interviewLogger : Update status
-
-interviewer --> calendar : RSVP
-candidate --> candidate_service : Select slot
-
-kafka --> interviewLogger : Status updates
-kafka --> dlq : On failure
-
+harvestSync -down-> mongodb : "Writes sync data"
+configService -left-> mongodb : "Stores/reads configuration"
 @enduml

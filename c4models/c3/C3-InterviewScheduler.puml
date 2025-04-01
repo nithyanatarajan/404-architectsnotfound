@@ -1,50 +1,60 @@
 @startuml
-skinparam componentStyle rectangle
-skinparam defaultTextAlignment center
-title RecruitX Next – C3 Component Diagram (Interview Scheduler)
+!define COMPONENT component
+!define CONTAINER rectangle
+!define DATABASE database
+!define EXTERNAL_SYSTEM rectangle
+!define INTERFACE interface
 
-actor "Kafka: interview-schedule-queue" as kafka_input
-actor "Kafka DLQ" as dlq
-database "MongoDB" as mongo
-component "Config Service" as config_service <<Microservice>>
-component "InterviewLogger" as interviewLogger <<External System>>
-queue "Kafka: interview-status-topic" as kafka_status
+' Container Context
+CONTAINER "candidate-service" as candidateService
+CONTAINER "interview-scheduler" as interviewScheduler
+CONTAINER "chatbot-interpreter" as chatbotInterpreter
+CONTAINER "harvest-sync" as harvestSync
+CONTAINER "config-service" as configService
 
-package "Interview Scheduler <<Microservice>>" {
-  component "SlotSelectionConsumer" <<Component>>
-  component "InterviewerSelector" <<Component>>
-  component "ScheduleValidator" <<Component>>
-  component "InterviewPersistenceManager" <<Component>>
-  component "NotificationDispatcher" <<Component>>
+' External Systems
+EXTERNAL_SYSTEM "Calendar" as calendar
+
+' Shared Database
+DATABASE "MongoDB" as mongodb
+
+' Focus Container
+CONTAINER "slot-seeker" as slotSeeker {
+  COMPONENT "AvailabilityProcessor" as availabilityProcessor
+  COMPONENT "SkillMatcher" as skillMatcher
+  COMPONENT "SlotCalculationEngine" as slotEngine
+  COMPONENT "InterviewerRankingService" as rankerService
+  COMPONENT "DataRepository" as dataRepository
+  COMPONENT "QueryOptimizer" as queryOptimizer
+  
+  INTERFACE "REST API" as restApi
+  INTERFACE "MongoDB Interface" as dbInterface
 }
 
-' === Flow ===
-kafka_input --> SlotSelectionConsumer : async event
+' External Connections to Container
+candidateService --> restApi : "GET /available-slots"
+chatbotInterpreter --> restApi : "GET /available-slots"
+interviewScheduler --> restApi : "GET /interviewer-matches"
+interviewScheduler --> restApi : "POST /lock-slot"
 
-SlotSelectionConsumer --> InterviewerSelector
-InterviewerSelector --> config_service : scoring rules
+' Internal Component Connections
+restApi --> queryOptimizer : "Optimizes query parameters"
+queryOptimizer --> dataRepository : "Queries for data"
+dataRepository --> dbInterface : "Accesses MongoDB"
+dbInterface --> mongodb : "Reads synced data"
 
-InterviewerSelector --> ScheduleValidator
-ScheduleValidator --> mongo : fetch slot/interviewer state
+dataRepository --> availabilityProcessor : "Processes availability"
+availabilityProcessor --> harvestSync : "Uses synced calendar data"
+availabilityProcessor --> configService : "Gets timezone configs"
+availabilityProcessor --> skillMatcher : "Filters by skills"
+skillMatcher --> configService : "Gets skill requirements"
+skillMatcher --> slotEngine : "Passes qualified interviewers"
+slotEngine --> rankerService : "Ranks interviewers"
+rankerService --> configService : "Gets ranking weights"
 
-ScheduleValidator --> InterviewPersistenceManager
-InterviewPersistenceManager --> NotificationDispatcher
-NotificationDispatcher --> kafka_status : interview status
-
-kafka_status --> interviewLogger : notify status change
-
-' === Resilience ===
-SlotSelectionConsumer --> dlq : on failure (e.g., invalid event)
-ScheduleValidator --> dlq : if 3 retries fail (configurable)
-
-note right of SlotSelectionConsumer
-  Triggered asynchronously via Kafka
-  Retry with backoff (3x max)
-end note
-
-note bottom of mongo
-  Used to validate existing schedules
-  and ensure no double-booking
-end note
-
+' Additional annotations
+note right of dataRepository : "Reads data synchronized by harvest-sync\nfrom external systems"
+note right of skillMatcher : "Matches candidate skills\nto interviewer expertise"
+note bottom of rankerService : "Uses weighted scoring based on\nexperience, past feedback, and availability"
+note left of availabilityProcessor : "Handles calendar conflicts,\ntime zone conversions, and leave plans"
 @enduml
