@@ -1,7 +1,6 @@
-# ADR-006: Service Mesh with Consul + Envoy
+# ADR-007: 009 Service Mesh Consul Envoy
 
 ## Status
-
 Accepted
 
 ## Context
@@ -15,6 +14,8 @@ Inter-service communication requires:
 
 We needed a solution that didn't require app-level logic or custom libraries.
 
+
+
 ## Decision
 
 We adopted:
@@ -22,12 +23,16 @@ We adopted:
 - **Consul** for service discovery and mesh config
 - **Envoy** as a sidecar proxy for traffic routing, retry, and telemetry
 
+
+
 ## Consequences
 
 - ✅ Uniform observability and security
 - ✅ Fine-grained traffic control (timeouts, retries, etc.)
 - ⚠️ More infra setup per pod (sidecars)
 - ⚠️ Consul agents need HA management
+
+
 
 ## Alternatives Considered
 
@@ -37,3 +42,10 @@ We adopted:
 ## Related Docs
 
 - [`DeploymentStrategy.md`](../DeploymentStrategy.md)
+
+
+- Option 1: ...
+- Option 2: ...
+
+## Related Docs
+- TODO: Link to related ADRs or architectural docs

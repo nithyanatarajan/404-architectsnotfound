@@ -1,7 +1,6 @@
-# ADR-007: GitOps with ArgoCD
+# ADR-008: 010 Gitops Argocd
 
 ## Status
-
 Accepted
 
 ## Context
@@ -14,6 +13,8 @@ GitOps offers:
 - Git as the single source of truth
 - Declarative infrastructure and application state
 - Automatic reconciliation between Git and cluster
+
+
 
 ## Decision
 
@@ -31,6 +32,8 @@ CI pipelines are responsible for:
 3. Updating the Helm `values.yaml` or Kustomize overlays in Git with the new image tag
 4. Committing the change to Git (which ArgoCD then picks up and applies)
 
+
+
 ## Consequences
 
 - ✅ Clear separation between **build (CI)** and **deploy (ArgoCD)**
@@ -38,6 +41,8 @@ CI pipelines are responsible for:
 - ✅ Supports preview environments and rollout strategies (e.g., blue-green, canary)
 - ⚠️ Requires good Git hygiene and values templating discipline
 - ⚠️ Developers must understand GitOps flow for troubleshooting
+
+
 
 ## Alternatives Considered
 
@@ -49,3 +54,10 @@ CI pipelines are responsible for:
 - [`DeploymentStrategy.md`](../DeploymentStrategy.md)
 - [`Techstack.md`](../Techstack.md)
 - [`ADR-003-tech-stack-choice.md`](./ADR-003-tech-stack-choice.md)
+
+
+- Option 1: ...
+- Option 2: ...
+
+## Related Docs
+- TODO: Link to related ADRs or architectural docs
