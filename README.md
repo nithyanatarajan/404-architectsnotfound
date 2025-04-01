@@ -50,12 +50,12 @@ scalable, cache-first interview scheduling system submitted for ArchKata 2025.
 
 ## 🧱 Architecture Diagrams
 
-| Diagram         | Status     | File                                              |
-|-----------------|------------|---------------------------------------------------|
-| C1 – Context    | ✅ Complete | [`SystemContext.png`](./images/SystemContext.png) |
-| C2 – Containers | 🔲 Pending | _(To be finalized)_                               |
-| C3 – Components | 🔲 Pending | _(To be finalized)_                               |
-| C4 – Code Map   | 🔲 Pending | _(To be finalized)_                               |
+| Diagram         | Status     | File                                               |
+|-----------------|------------|----------------------------------------------------|
+| C1 – Context    | ✅ Complete | ![SystemContext](images/C1SystemContext.png)       |
+| C2 – Containers | ✅ Complete | ![ContainerDiagram](images/C2ContainerDiagram.png) |
+| C3 – Components | 🔲 WIP     | _(To be finalized)_                                |
+| C4 – Code Map   | 🔲 WIP     | _(To be finalized)_                                |
 
 See [`Diagrams.md`](./docs/Diagrams.md) for a visual index and evolution notes.
 
@@ -139,7 +139,7 @@ Refer to [`TraceabilityMatrix.md`](./docs/TraceabilityMatrix.md) for complete ma
 ## ✅ Submission Checklist (as per ArchKata25)
 
 - [x] C1 – System Context Diagram
-- [ ] C2 – Container Diagram
+- [x] C2 – Container Diagram
 - [ ] C3 – Component Diagram
 - [ ] C4 – Code Mapping / Deployment View
 - [x] Architecture characteristics documented
