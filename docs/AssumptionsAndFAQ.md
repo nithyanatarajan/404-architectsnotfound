@@ -2,7 +2,7 @@
 
 ## 1. Functional Requirements & Business Rules
 
-### ✅ Assumptions
+### ❗Assumptions
 
 - The system **automatically reschedules** interviews upon decline and notifies the recruiter only if it fails to find a
   new slot.
@@ -31,7 +31,7 @@
 
 ## 2. Integrations & Data Flow
 
-### ✅ Assumptions
+### ❗Assumptions
 
 - **Calendar** is the only supported calendar provider initially. Integration assumes:
     - **API-level access is available behind MindCompute's Okta SSO**
@@ -70,7 +70,7 @@
 
 ## 3. Architecture & Scalability Considerations
 
-### ✅ Assumptions
+### ❗Assumptions
 
 - The solution is designed as a **single-tenant system** for MindCompute (multi-tenancy is out of scope).
 - The expected initial load:
@@ -103,7 +103,7 @@
 
 ## 4. Chatbot, Notifications & UX Strategy
 
-### ✅ Assumptions
+### ❗Assumptions
 
 - The **chatbot is designed exclusively for recruiters**; candidates and interviewers do not interact with it (as per
   ArchKata25 scope).
@@ -143,7 +143,7 @@
 
 ## 5. Reporting & Performance Metrics
 
-### ✅ Assumptions
+### ❗Assumptions
 
 - Recruiters need visibility into key interview lifecycle metrics, such as:
     - Interview completion rate
@@ -180,7 +180,7 @@
 
 ## 6. Security & Reliability
 
-### ✅ Assumptions
+### ❗Assumptions
 
 - The system must handle **interviewer and candidate data** responsibly, though **no specific compliance requirements
   ** (e.g., GDPR, SOC2) are stated in ArchKata25.
@@ -214,7 +214,7 @@
 
 ## 7. Compliance Considerations
 
-### ✅ Assumptions
+### ❗Assumptions
 
 - The ArchKata25 problem statement does **not explicitly specify** regulatory requirements such as GDPR, SOC 2, or
   HIPAA.

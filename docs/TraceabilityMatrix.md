@@ -5,28 +5,28 @@ design decisions, artifacts, and solution components in RecruitX.
 
 ---
 
-| Problem / FAQ Area                         | Covered In                                                                   | Notes                                                                |
-|--------------------------------------------|------------------------------------------------------------------------------|----------------------------------------------------------------------|
-| Interviewer skill-based matching           | `UserJourneys.md`, `Microservices.md` (InterviewerProfileService)            | Based on skill + preferred round; role mapping optional via config   |
-| Interviewer availability & workload        | `AssumptionsAndFAQ.md` (Sections 1, 2), `Microservices.md`                   | Calendar + Leave + Capacity from integrated sources, via cache       |
-| Leave integration (LeavePlanner)          | `AssumptionsAndFAQ.md` (Section 2), `Cache Refresh Job`                      | Polled daily; fallback on failures with alert                        |
-| Rescheduling flow                          | `UserJourneys.md`, `AssumptionsAndFAQ.md` (Sections 1, 2, 4)                 | Auto-retries + fallback flow with recruiter alert                    |
-| Chatbot as interface                       | `AssumptionsAndFAQ.md` (Section 4), `UserJourneys.md`                        | Supports scheduling, rescheduling, and slot lookups                  |
-| NLP-driven chatbot search                  | `AssumptionsAndFAQ.md` (Section 4), `AITools.md` (planned)                   | Skill- and slot-based prompts; extensible                            |
-| DLQ handling for failed events             | `AssumptionsAndFAQ.md` (Sections 3, 6), `Tradeoffs.md`, `Characteristics.md` | Kafka DLQs + dashboard visibility with RBAC                          |
-| Notification handling                      | `AssumptionsAndFAQ.md` (Sections 4, 6), `UserJourneys.md`                    | Email + Messenger for recruiters; optional config for interviewers |
-| Interviewer decline handling               | `AssumptionsAndFAQ.md` (Section 1), `UserJourneys.md`                        | 3x decline threshold disables auto-match temporarily                 |
-| Dashboard access for recruiters            | `AssumptionsAndFAQ.md` (Sections 1, 4, 5), `Microservices.md`                | RBAC controls access to workload, reports, DLQ, alerts               |
-| Reporting and interview analytics          | `AssumptionsAndFAQ.md` (Section 5), `AITools.md` (planned)                   | Load metrics, trends, reschedule reasons; CSV/PDF exports            |
-| Calendar API usage                  | `AssumptionsAndFAQ.md` (Section 2), `TechStack.md`, `Security.md`            | Behind Okta SSO via OIDC; used by refresh jobs only                  |
-| MindComputeScheduler integration (capacity/preference) | `AssumptionsAndFAQ.md` (Section 2)                                           | API assumed but not verified — flagged as open risk                  |
-| External system failure handling           | `AssumptionsAndFAQ.md` (Sections 2, 6), `ArchitectureStyle.md`               | Cache fallback + alert after 3 failures                              |
-| Scalability and load expectations          | `AssumptionsAndFAQ.md` (Section 3), `ArchitectureStyle.md`                   | 3–5x interview load supported via horizontal scaling                 |
-| RBAC enforcement                           | `AssumptionsAndFAQ.md` (Sections 4, 5, 6, 7), `TechStack.md`                 | Governs access to DLQ, reports, dashboards                           |
-| Compliance & PII handling                  | `AssumptionsAndFAQ.md` (Section 7)                                           | All user data treated as PII; encrypted + audit-logged               |
-| Multi-tenancy support                      | `AssumptionsAndFAQ.md` (Section 3)                                           | Out of scope — single-tenant (MindCompute only)                         |
-| Cache-first read architecture              | `AssumptionsAndFAQ.md` (Section 2), `Characteristics.md`, `Tradeoffs.md`     | All reads via Redis cache; refresh jobs pull data                    |
-| MongoDB as sync-layer cache                | `TechStack.md`, `Microservices.md` (harvest-sync, slot-seeker)               | Durable storage of external data, supports eventual consistency      |
-| Messenger Notifier integration                 | `Diagrams.md`, `UserJourneys.md`, `Microservices.md`                         | Sends notifications to recruiters via Messenger via adapter        |
-| DLQ visibility via dashboard               | `Tradeoffs.md`, `Microservices.md`, `UserJourneys.md`                        | Visible to RBAC-authorized users; traceable/reschedulable            |
-| Compliance traceability                    | `TraceabilityMatrix.md`, `Security.md`, `Characteristics.md`                 | Enforced encryption, access audit trails, no raw API exposure        |
+| Problem / FAQ Area                         | Covered In                                                                      | Notes                                                                |
+|--------------------------------------------|---------------------------------------------------------------------------------|----------------------------------------------------------------------|
+| Interviewer skill-based matching           | `UserJourneys.md`, `Microservices.md` (`slot-seeker`)                           | Matching based on skills, availability, and round config             |
+| Interviewer availability & workload        | `AssumptionsAndFAQ.md` (Sections 1, 2), `Microservices.md`                      | Calendar, Leave, and Capacity fetched by `harvest-sync` and cached   |
+| Leave integration (LeavePlanner)          | `AssumptionsAndFAQ.md` (Section 2), `Microservices.md`, `DeploymentStrategy.md` | Polled daily via `harvest-sync`; fallback with alerting              |
+| Rescheduling flow                          | `UserJourneys.md`, `AssumptionsAndFAQ.md` (Sections 1, 2, 4)                    | Retry + fallback logic with recruiter alerts                         |
+| Chatbot as interface                       | `UserJourneys.md`, `AssumptionsAndFAQ.md` (Section 4)                           | Supports lookup and scheduling directly via natural language         |
+| NLP-driven chatbot search                  | `AITools.md`, `UserJourneys.md`                                                 | spaCy + Transformers with optional LLM (Gemini/Ollama) integration   |
+| DLQ handling for failed events             | `Characteristics.md`, `Tradeoffs.md`, `Microservices.md`                        | Kafka DLQs with dashboard visibility and RBAC scope                  |
+| Notification handling                      | `UserJourneys.md`, `Microservices.md`                                           | Via Email, and Messenger (`Messenger Notifier`)                        |
+| Interviewer decline handling               | `UserJourneys.md`, `Microservices.md`                                           | On decline, system retries with next best match (no threshold logic) |
+| Dashboard access for recruiters            | `UserJourneys.md`, `Microservices.md`, `TechStack.md`                           | Controlled via RBAC; access to reports, alerts, DLQ                  |
+| Reporting and interview analytics          | `AITools.md`, `UserJourneys.md`                                                 | Metrics, summaries, AI-powered insights, CSV/PDF exports             |
+| Calendar API usage                  | `DeploymentStrategy.md`, `TechStack.md`, `Security.md`                          | Used only by `harvest-sync`; integrated via OIDC-authenticated flow  |
+| MindComputeScheduler integration (capacity/preference) | `AssumptionsAndFAQ.md` (Section 2)                                              | API assumed; callout added in ADR-007                                |
+| External system failure handling           | `ArchitectureStyle.md`, `Characteristics.md`                                    | 3x failure fallback + alerting; DLQs track sync issues               |
+| Scalability and load expectations          | `ArchitectureStyle.md`, `Characteristics.md`                                    | Stateless services, autoscaling supported via Kubernetes             |
+| RBAC enforcement                           | `TechStack.md`, `UserJourneys.md`, `Microservices.md`                           | Controls access to dashboard, DLQs, reports                          |
+| Compliance & PII handling                  | `Security.md`, `Characteristics.md`                                             | PII encrypted, access logged, all data scoped to MindCompute            |
+| Multi-tenancy support                      | `ArchitectureStyle.md`, `AssumptionsAndFAQ.md`                                  | Not supported – single-tenant only                                   |
+| Cache-first read architecture              | `Characteristics.md`, `Tradeoffs.md`, `DeploymentStrategy.md`                   | Redis = live reads; Mongo = sync layer from external systems         |
+| MongoDB as sync-layer cache                | `TechStack.md`, `Microservices.md`                                              | Durable store for MyMindComputeProfile, Calendar, MindComputeScheduler data via `harvest-sync` |
+| Messenger Notifier integration                 | `UserJourneys.md`, `Microservices.md`, `Diagrams.md`                            | Separate notifier pushes alerts via Messenger to recruiters        |
+| DLQ visibility via dashboard               | `Microservices.md`, `TechStack.md`, `UserJourneys.md`                           | Viewable via dashboard; replayable with RBAC control                 |
+| Compliance traceability                    | `Security.md`, `TraceabilityMatrix.md`                                          | Centralized secrets, encrypted transport, audit logging              |

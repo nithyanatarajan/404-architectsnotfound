@@ -77,7 +77,7 @@ Once initiated:
 - Updates are:
     - Logged via Kafka events
     - Synced with InterviewLogger
-    - Delivered to recruiter via Messenger and any other configured channels (e.g., email, Slack)
+    - Delivered to recruiter via Messenger and any other configured channels (e.g., email)
 
 ---
 
