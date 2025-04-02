@@ -1,0 +1,55 @@
+@startuml
+allowmixing
+
+skinparam componentStyle rectangle
+
+title C4 – Notifier Service Code Diagram
+
+package "notifier-service" {
+
+  package "interface" {
+    class KafkaListener {
+      +onMessage(event)
+    }
+  }
+
+  package "orchestrator" {
+    class NotificationDispatcher {
+      +dispatch(event)
+    }
+  }
+
+  package "notifiers" {
+    class CalendarNotifier {
+      +sendCalendarInvite()
+      +updateCalendarEvent()
+    }
+
+    class EmailNotifier {
+      +sendEmail()
+    }
+
+    class ChatNotifier {
+      +sendChatMessage()
+    }
+  }
+
+  package "retry" {
+    class DLQHandler {
+      +retry(event)
+      +sendToDLQ(event)
+    }
+  }
+}
+
+' Internal wiring
+KafkaListener --> NotificationDispatcher : "Receives event"
+NotificationDispatcher --> CalendarNotifier : "Handle Calendar"
+NotificationDispatcher --> EmailNotifier : "Handle email notifications"
+NotificationDispatcher --> ChatNotifier : "Handle chat alerts"
+
+CalendarNotifier --> DLQHandler : "Retry on failure"
+EmailNotifier --> DLQHandler : "Retry on failure"
+ChatNotifier --> DLQHandler : "Retry on failure"
+
+@enduml

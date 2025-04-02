@@ -1,0 +1,70 @@
+@startuml
+!define COMPONENT component
+!define CONTAINER rectangle
+!define DATABASE database
+!define EXTERNAL_SYSTEM rectangle
+!define INTERFACE interface
+
+title C3 – Harvest Sync Component Diagram
+
+' External Systems
+EXTERNAL_SYSTEM "InterviewLogger\n(ATS)" as interviewLogger
+EXTERNAL_SYSTEM "MyMindComputeProfile\n(Skills)" as myMindComputeProfile
+EXTERNAL_SYSTEM "LeavePlanner" as leavePlanner
+EXTERNAL_SYSTEM "Calendar" as calendar
+EXTERNAL_SYSTEM "MindComputeScheduler\n(Candidate Slot UI)" as mindComputeScheduler
+
+' Focus Container
+CONTAINER "harvest-sync" as harvestSync {
+  package "Orchestration" {
+    COMPONENT "SyncScheduler <<component>>\n==\nTriggers periodic sync jobs" as syncScheduler
+    COMPONENT "SyncOrchestrator <<component>>\n==\nCoordinates multiple sync tasks" as syncOrchestrator
+  }
+
+  package "Data Fetchers" {
+    COMPONENT "InterviewLoggerFetcher <<component>>\n==\nFetches candidate/interview data" as interviewLoggerFetcher
+    COMPONENT "MyMindComputeProfileFetcher <<component>>\n==\nFetches skills and expertise" as myMindComputeProfileFetcher
+    COMPONENT "LeavePlannerFetcher <<component>>\n==\nFetches interviewer PTO" as leavePlannerFetcher
+    COMPONENT "MindComputeSchedulerFetcher <<component>>\n==\nFetches slot preferences" as mindComputeSchedulerFetcher
+    COMPONENT "CalendarFetcher <<component>>\n==\nFetches availability" as calendarFetcher
+  }
+
+  package "Data Storage" {
+    COMPONENT "MongoDBAdapter <<component>>\n==\nWrites synced data to cache" as mongoAdapter
+  }
+
+  INTERFACE "Scheduler Trigger <<interface>>" as schedulerTrigger
+}
+
+' External Inputs
+schedulerTrigger --> syncScheduler : "Triggers periodic sync"
+syncScheduler --> syncOrchestrator : "Initiates sync process"
+
+' Internal Component Flow
+syncOrchestrator --> interviewLoggerFetcher : "Sync candidate/interview data"
+interviewLoggerFetcher --> interviewLogger : "GET /candidates"
+
+syncOrchestrator --> myMindComputeProfileFetcher : "Sync skills data"
+myMindComputeProfileFetcher --> myMindComputeProfile : "GET /skills"
+
+syncOrchestrator --> leavePlannerFetcher : "Sync leave data"
+leavePlannerFetcher --> leavePlanner : "GET /pto"
+
+syncOrchestrator --> mindComputeSchedulerFetcher : "Sync candidate slot preferences"
+mindComputeSchedulerFetcher --> mindComputeScheduler : "GET /preferences"
+
+syncOrchestrator --> calendarFetcher : "Sync availability"
+calendarFetcher --> calendar : "GET /availability"
+
+' Data Storage
+interviewLoggerFetcher --> mongoAdapter : "Write candidate/interview data"
+myMindComputeProfileFetcher --> mongoAdapter : "Write skills data"
+leavePlannerFetcher --> mongoAdapter : "Write PTO data"
+mindComputeSchedulerFetcher --> mongoAdapter : "Write slot preferences"
+calendarFetcher --> mongoAdapter : "Write availability"
+
+' Notes
+note right of syncScheduler : "Runs on cron or event-based trigger"
+note right of mongoAdapter : "Caches external system data for faster access"
+note bottom of syncOrchestrator : "Ensures all fetchers sync data in a controlled manner"
+@enduml

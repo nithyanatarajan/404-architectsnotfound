@@ -1,0 +1,52 @@
+@startuml
+!define COMPONENT component
+!define CONTAINER rectangle
+!define EXTERNAL_SYSTEM rectangle
+!define INTERFACE interface
+
+title C3 – Notifier Service Component Diagram
+
+' External Systems
+EXTERNAL_SYSTEM "Kafka Queue" as kafkaQueue
+EXTERNAL_SYSTEM "Calendar" as calendar
+EXTERNAL_SYSTEM "Email Service" as emailService
+EXTERNAL_SYSTEM "Messenger" as Messenger
+
+' Focus Container
+CONTAINER "notifier-service" as notifier {
+  
+  package "Message Processing" {
+    COMPONENT "KafkaConsumer <<component>>\n==\nListens for scheduling events" as kafkaConsumer
+  }
+  
+  package "Notification Handling" {
+    COMPONENT "CalendarNotifier <<component>>\n==\nHandles Calendar events" as calendarNotifier
+    COMPONENT "EmailNotifier <<component>>\n==\nSends email notifications" as emailNotifier
+    COMPONENT "ChatNotifier <<component>>\n==\nSends Messenger messages" as chatNotifier
+  }
+  
+  package "Fallback & Reliability" {
+    COMPONENT "DLQHandler <<component>>\n==\nHandles retry and failure scenarios" as dlqHandler
+  }
+
+  INTERFACE "Kafka Listener <<interface>>" as kafkaListener
+}
+
+' External Inputs
+kafkaQueue --> kafkaListener : "Event delivered"
+kafkaListener --> kafkaConsumer : "notifier.event.received"
+
+' Internal Component Flow
+kafkaConsumer --> calendarNotifier : "Notify Calendar"
+calendarNotifier --> calendar : "Create/update event"
+
+kafkaConsumer --> emailNotifier : "Send email alert"
+emailNotifier --> emailService : "Trigger email notification"
+
+kafkaConsumer --> chatNotifier : "Send Messenger alert"
+chatNotifier --> Messenger : "Post message"
+
+kafkaConsumer --> dlqHandler : "Handle failures"
+dlqHandler --> kafkaQueue : "Send to DLQ on failure"
+
+@enduml

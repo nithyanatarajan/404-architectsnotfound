@@ -1,0 +1,67 @@
+@startuml
+allowmixing
+
+skinparam componentStyle rectangle
+
+title C4 – Harvest Sync (Go Service) Code Diagram
+
+package "harvest-sync" {
+
+  package "interface" {
+    class Scheduler {
+      +triggerSync()
+    }
+  }
+
+  package "orchestrator" {
+    class SyncOrchestrator {
+      +executeSync()
+    }
+  }
+
+  package "fetchers" {
+    class InterviewLoggerFetcher {
+      +fetchCandidates()
+      +fetchInterviews()
+    }
+
+    class MyMindComputeProfileFetcher {
+      +fetchSkills()
+    }
+
+    class LeavePlannerFetcher {
+      +fetchPTO()
+    }
+
+    class MindComputeSchedulerFetcher {
+      +fetchPreferences()
+    }
+
+    class CalendarFetcher {
+      +fetchAvailability()
+    }
+  }
+
+  package "storage" {
+    class MongoDBAdapter {
+      +writeData()
+      +readData()
+    }
+  }
+}
+
+' Internal wiring
+Scheduler --> SyncOrchestrator : "Initiates sync"
+SyncOrchestrator --> InterviewLoggerFetcher : "Fetch candidate/interview data"
+SyncOrchestrator --> MyMindComputeProfileFetcher : "Fetch skills data"
+SyncOrchestrator --> LeavePlannerFetcher : "Fetch leave data"
+SyncOrchestrator --> MindComputeSchedulerFetcher : "Fetch slot preferences"
+SyncOrchestrator --> CalendarFetcher : "Fetch availability"
+
+InterviewLoggerFetcher --> MongoDBAdapter : "Write candidates/interviews"
+MyMindComputeProfileFetcher --> MongoDBAdapter : "Write skills"
+LeavePlannerFetcher --> MongoDBAdapter : "Write PTO"
+MindComputeSchedulerFetcher --> MongoDBAdapter : "Write slot preferences"
+CalendarFetcher --> MongoDBAdapter : "Write availability"
+
+@enduml
