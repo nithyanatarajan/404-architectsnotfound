@@ -1,0 +1,49 @@
+@startuml
+!define COMPONENT component
+!define CONTAINER rectangle
+!define DATABASE database
+!define EXTERNAL_SYSTEM rectangle
+!define INTERFACE interface
+
+title C3 – Slot Seeker Component Diagram
+' Container Context
+CONTAINER "candidate-service" as candidateService
+CONTAINER "interview-scheduler" as interviewScheduler
+CONTAINER "chatbot-interpreter" as chatbotInterpreter
+CONTAINER "harvest-sync" as harvestSync
+CONTAINER "config-service" as configService
+
+' Focus Container
+CONTAINER "slot-seeker" as slotSeeker {
+  COMPONENT "InterviewerInfoFetcher <<component>>\n==\nFetches interviewer skills, calendar, leave" as interviewerFetcher
+  COMPONENT "ConfigDimensionFetcher <<component>>\n==\nFetches dimensions based on user query" as configFetcher
+  COMPONENT "SlotCalculationEngine <<component>>\n==\nComputes valid interview slots" as slotEngine
+  COMPONENT "InterviewerRankingService <<component>>\n==\nRanks interviewers for selection" as rankerService
+  COMPONENT "RequestContextParser <<utility>>\n==\nParses candidate input" as contextParser
+  COMPONENT "QueryOptimizer <<utility>>\n==\nOptimizes request query" as queryOptimizer
+
+  INTERFACE "REST API <<interface>>" as restApi
+}
+
+' External Connections to Container
+candidateService --> restApi : "GET /available-slots"
+chatbotInterpreter --> restApi : "GET /available-slots"
+interviewScheduler --> restApi : "GET /available-slots"
+
+' Internal Component Connections
+restApi --> queryOptimizer : "Optimizes query parameters"
+queryOptimizer --> contextParser : "Parses candidate and context"
+contextParser --> configFetcher : "Fetches config dimensions"
+configFetcher --> configService : "Queries dimension config"
+configFetcher --> interviewerFetcher : "Passes dimension filters"
+interviewerFetcher --> harvestSync : "Fetches calendar, skills, leave"
+interviewerFetcher --> slotEngine : "Sends interviewer availability"
+slotEngine --> rankerService : "Ranks interviewers"
+rankerService --> configService : "Gets ranking weights"
+
+' Additional annotations
+note right of configFetcher : "Fetches dimension config\nbased on user query"
+note bottom of rankerService : "Uses weighted scoring based on\nexperience, past feedback, and availability"
+note left of interviewerFetcher : "Fetches interviewer calendar,\nskills, leave data via harvest-sync"
+note right of contextParser : "Extracts candidate and request context\nfrom incoming API inputs"
+@enduml

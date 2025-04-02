@@ -1,0 +1,71 @@
+@startuml
+!define COMPONENT component
+!define CONTAINER rectangle
+!define DATABASE database
+!define EXTERNAL_SYSTEM rectangle
+!define INTERFACE interface
+
+title C3 – Interview Scheduler Component Diagram
+' External Containers
+CONTAINER "slot-seeker" as slotSeeker
+CONTAINER "chatbot-interpreter" as chatbotInterpreter
+CONTAINER "config-service" as configService
+CONTAINER "calendar-service" as calendarService
+CONTAINER "candidate-service" as candidateService
+
+' External Systems
+EXTERNAL_SYSTEM "Kafka Queue" as kafkaQueue
+EXTERNAL_SYSTEM "Calendar" as calendar
+EXTERNAL_SYSTEM "Email Service" as emailService
+
+' Focus Container
+CONTAINER "interview-scheduler" as scheduler {
+  package "Orchestration" {
+    COMPONENT "KafkaConsumer <<component>>\n==\nConsumes interview request events" as kafkaConsumer
+    COMPONENT "SchedulePlanner <<component>>\n==\nOrchestrates scheduling flow" as planner
+    COMPONENT "SlotSelector <<component>>\n==\nSelects or waits for slot confirmation" as selector
+  }
+
+  package "Integration" {
+    COMPONENT "ConfigFetcher <<component>>\n==\nFetches config, weights, thresholds" as configFetcher
+    COMPONENT "SlotSeekerClient <<component>>\n==\nFetches slots from slot-seeker" as slotClient
+    COMPONENT "SlotLockCoordinator <<component>>\n==\nFinalizes and locks slot" as locker
+    COMPONENT "NotifierAdapter <<component>>\n==\nSends calendar/email/chat notifications" as notifier
+  }
+
+  package "Fallback & Reliability" {
+    COMPONENT "FallbackHandler <<component>>\n==\nTriggers chatbot fallback" as fallback
+    COMPONENT "DLQHandler <<component>>\n==\nHandles retries and failures" as dlq
+  }
+
+  INTERFACE "Kafka Listener <<interface>>" as kafkaListener
+}
+
+' External Inputs
+candidateService --> kafkaQueue : "Publishes interview.request"
+kafkaQueue --> kafkaListener : "Event delivered"
+kafkaListener --> kafkaConsumer : "interview.request.received"
+
+' Internal Component Flow
+kafkaConsumer --> planner : "Pass scheduling request"
+planner --> configFetcher : "Fetch config"
+configFetcher --> configService : "GET /config"
+planner --> slotClient : "Get available slots"
+slotClient --> slotSeeker : "GET /available-slots"
+planner --> selector : "Select best slot"
+selector --> locker : "Lock slot"
+locker --> calendarService : "Create calendar event"
+planner --> notifier : "Send notifications"
+notifier --> calendar : "Notify interviewer"
+notifier --> emailService : "Email candidate"
+notifier --> chatbotInterpreter : "Notify recruiter"
+planner --> fallback : "Trigger on failure"
+fallback --> chatbotInterpreter : "Fallback via chat"
+planner --> dlq : "Send to DLQ on error"
+
+' Notes
+note right of kafkaConsumer : "Consumes from Kafka topic"
+note right of configFetcher : "Gets duration, ranking weights, rules"
+note right of fallback : "Manual escalation to recruiter chatbot"
+note bottom of locker : "Locks slot in calendar"
+@enduml

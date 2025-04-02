@@ -1,0 +1,59 @@
+@startuml
+allowmixing
+
+skinparam componentStyle rectangle
+
+title C4 – Slot Seeker (Go Service) Code Diagram
+
+package "slot-seeker" {
+
+  package "interface" {
+    class RestAPI {
+      +getAvailableSlots(request)
+    }
+  }
+
+  package "query" {
+    class QueryOptimizer {
+      +optimize(request)
+    }
+
+    class RequestContextParser {
+      +parse(context)
+    }
+  }
+
+  package "config" {
+    class ConfigDimensionFetcher {
+      +fetchDimensions(query)
+    }
+  }
+
+  package "interviewer" {
+    class InterviewerInfoFetcher {
+      +fetchCalendar()
+      +fetchSkills()
+      +fetchLeaveData()
+    }
+  }
+
+  package "engine" {
+    class SlotCalculationEngine {
+      +calculateSlots()
+    }
+
+    class InterviewerRankingService {
+      +rank()
+    }
+  }
+}
+
+' Internal wiring
+RestAPI --> QueryOptimizer : parses and optimizes query
+QueryOptimizer --> RequestContextParser
+RequestContextParser --> ConfigDimensionFetcher
+ConfigDimensionFetcher --> InterviewerInfoFetcher
+InterviewerInfoFetcher --> SlotCalculationEngine
+SlotCalculationEngine --> InterviewerRankingService
+
+@enduml

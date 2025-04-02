@@ -1,0 +1,84 @@
+@startuml
+allowmixing
+
+skinparam componentStyle rectangle
+
+title C4 – Interview Scheduler (Go Service) Code Diagram
+
+package "interview-scheduler" {
+
+  package "orchestrator" {
+    class KafkaConsumer {
+      +consume(event)
+      +retryOnFailure()
+    }
+
+    class SchedulePlanner {
+      +planSchedule()
+      -resolveDependencies()
+    }
+
+    class SlotSelector {
+      +selectSlot()
+      -awaitUserConfirmation()
+    }
+  }
+
+  package "config" {
+    class ConfigFetcher {
+      +getWeights()
+      +getFallbackThreshold()
+    }
+  }
+
+  package "client" {
+    class SlotSeekerClient {
+      +fetchAvailableSlots()
+    }
+
+    class NotifierAdapter {
+      +notifyRecruiter()
+      +notifyCandidate()
+    }
+
+    class CalendarWriter {
+      +bookCalendarSlot()
+    }
+  }
+
+  package "lock" {
+    class SlotLockCoordinator {
+      +lockSlot()
+      +validateAndPersist()
+    }
+  }
+
+  package "fallback" {
+    class FallbackHandler {
+      +triggerChatbotFallback()
+    }
+
+    class DLQHandler {
+      +sendToDLQ()
+      +retryLater()
+    }
+  }
+}
+
+' Internal wiring
+KafkaConsumer --> SchedulePlanner
+SchedulePlanner --> ConfigFetcher
+SchedulePlanner --> SlotSeekerClient
+SchedulePlanner --> SlotSelector
+SlotSelector --> SlotLockCoordinator
+SlotLockCoordinator --> CalendarWriter
+SchedulePlanner --> NotifierAdapter
+SchedulePlanner --> FallbackHandler
+SchedulePlanner --> DLQHandler
+
+' External systems
+queue "Kafka" as kafka
+KafkaConsumer --> kafka : consumes
+NotifierAdapter --> kafka : publishes status
+
+@enduml

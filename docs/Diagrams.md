@@ -45,13 +45,26 @@ All internal REST calls are secured using a 🔐 **Secure Internal Mesh**:
 
 ![ContainerDiagram.png](../images/C2ContainerDiagram.png)
 
-## 🧠 C3: Component Diagram – `interview-scheduler` (WIP)
+## 🧠 C3: Component Diagram
 
 **Purpose**: Show internal structure of the scheduler service
 
-![ComponentDiagram.png](../images/C3ComponentDiagram.png)
+### `interview-scheduler`
 
-## 🧩 C4: Component Diagram – `interview-scheduler` (WIP)
+![C3InterviewScheduler.png](../images/C3InterviewScheduler.png)
+
+### `slot-seeker`
+
+![C3SlotSeeker.png](../images/C3SlotSeeker.png)
+
+## 🧩 C4: Component Diagram
 
 **Purpose**: Show internal structure of the scheduler service
-![CodeDiagram.png](../images/C4CodeDiagram.png)
+
+### `interview-scheduler`
+
+![C4InterviewScheduler.png](../images/C4InterviewScheduler.png)
+
+### `slot-seeker`
+
+![C4SlotSeeker.png](../images/C4SlotSeeker.png)
