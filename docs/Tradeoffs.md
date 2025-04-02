@@ -3,7 +3,7 @@
 This document outlines the key architectural tradeoffs made during the design of the RecruitX Next system. It aims to
 capture **why** certain decisions were made, and the **pros/cons** that were evaluated.
 
-_For full rationale and decision context, refer to [ADR-004](./ADR-004-quality-tradeoffs.md)._
+_For full rationale and decision context, refer to [ADR-004](./adrs/ADR-004-quality-tradeoffs.md)._
 
 ## 🧱 Event-Driven vs Request-Driven Architecture
 
