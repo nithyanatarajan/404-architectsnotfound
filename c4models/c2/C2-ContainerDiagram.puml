@@ -45,7 +45,8 @@ SYSTEM_BOUNDARY "RecruitX Next System" as recruitX {
 
   package "Data Layer" {
     CONTAINER "harvest-sync\n==\nPeriodic sync from external systems" as harvester
-    DATABASE "MongoDB\n==\nCached interviewer data + configs" as mongodb
+    DATABASE "MongoDB\n==\nCached interviewer data" as mongodb
+    DATABASE "MongoDB\n==\nConfigurations" as configdb
     DATABASE "Kafka Topics\n==\nInterview events + DLQs" as kafka
   }
 }
@@ -84,10 +85,12 @@ harvester -.-> myMindComputeProfile : Sync skills
 harvester -.-> leavePlanner : Sync PTO
 harvester -.-> mindComputeScheduler : Sync preferences
 harvester -.-> calendar : Sync availability
-harvester --> mongodb : Write cache
+harvester --> mongodb : [Cache] Write external systems data
+
+interviewLoggerWrapper --> mongodb : [Cache] Write interview data
 
 slotSeeker --> config : Get rules
 slotSeeker --> mongodb : Read data
-config --> mongodb : Store rules
+config --> configdb : Store rules
 
 @enduml
