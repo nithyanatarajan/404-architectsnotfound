@@ -73,7 +73,7 @@
 ### ❗Assumptions
 
 - The solution is designed as a **single-tenant system** for MindCompute (multi-tenancy is out of scope).
-- The expected initial load:
+- The expected eventual load:
     - ~100 interviews/day
     - ~10,000 interviewers
     - ~500 recruiters
