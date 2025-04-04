@@ -50,12 +50,13 @@ cache-first interview scheduling system submitted for ArchKata 2025.
 
 ## 🗂️ Architecture Diagrams
 
-| Diagram         | Status     | File                                                                                                            |
-|-----------------|------------|-----------------------------------------------------------------------------------------------------------------|
-| C1 – Context    | ✅ Complete | ![SystemContext](images/C1SystemContext.png)                                                                    |
-| C2 – Containers | ✅ Complete | ![ContainerDiagram](images/C2ContainerDiagram.png)                                                              |
-| C3 – Components | ✅ Complete | ![C3InterviewScheduler.png](images/C3InterviewScheduler.png) <br>  ![C3SlotSeeker.png](images/C3SlotSeeker.png) |
-| C4 – Code       | ✅ Complete | ![C4InterviewScheduler.png](images/C4InterviewScheduler.png) <br> ![C4SlotSeeker.png](images/C4SlotSeeker.png)  |
+| Diagram          | Status     | File                                                                                                                                                                                                                        |
+|------------------|------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| HLD – High Level | ✅ Complete | ![HLD.png](images/HLD.png)                                                                                                                                                                                                  |
+| C1 – Context     | ✅ Complete | ![SystemContext](images/C1SystemContext.png)                                                                                                                                                                                |
+| C2 – Containers  | ✅ Complete | ![ContainerDiagram](images/C2ContainerDiagram.png)                                                                                                                                                                          |
+| C3 – Components  | ✅ Complete | [C3InterviewScheduler.png](images/C3InterviewScheduler.png) <br>  [C3SlotSeeker.png](images/C3SlotSeeker.png) <br> [C3HarvestSync.png](images/C3HarvestSync.png) <br> [C3NotifierService.png](images/C3NotifierService.png) |
+| C4 – Code        | ✅ Complete | [C4InterviewScheduler.png](images/C4InterviewScheduler.png) <br>  [C4SlotSeeker.png](images/C4SlotSeeker.png) <br> [C4HarvestSync.png](images/C4HarvestSync.png) <br> [C4NotifierService.png](images/C4NotifierService.png) |
 
 📎 See [`Diagrams.md`](./docs/Diagrams.md) for a visual index and design evolution notes.
 

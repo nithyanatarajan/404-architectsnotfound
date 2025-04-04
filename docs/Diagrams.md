@@ -57,6 +57,14 @@ All internal REST calls are secured using a 🔐 **Secure Internal Mesh**:
 
 ![C3SlotSeeker.png](../images/C3SlotSeeker.png)
 
+### `harvest-sync`
+
+![C3HarvestSync.png](../images/C3HarvestSync.png)
+
+### `notifier-service`
+
+![C3NotifierService.png](../images/C3NotifierService.png)
+
 ## 🧩 C4: Component Diagram
 
 **Purpose**: Show internal structure of the scheduler service
@@ -68,3 +76,11 @@ All internal REST calls are secured using a 🔐 **Secure Internal Mesh**:
 ### `slot-seeker`
 
 ![C4SlotSeeker.png](../images/C4SlotSeeker.png)
+
+### `harvest-sync`
+
+![C4HarvestSync.png](../images/C4HarvestSync.png)
+
+### `notifier-service`
+
+![C4NotifierService.png](../images/C4NotifierService.png)
