@@ -158,6 +158,16 @@ It blends:
 - Observable infrastructure
 - Fallback resilience
 
+---
+
+## 🙌 Team
+
+Member 1: [Aadhithya Ramesh](https://github.com/AadhiRamesh)
+
+Member 2: [Nithya N](https://github.com/nithyanatarajan)
+
+Member 3: [Vishwa Priya J](https://github.com/vishwapriya)
+
 > This repository is our ArchKata 25 submission. All design decisions reflect architectural intent, not implementation.
 
 Thanks for reading! 🙏
